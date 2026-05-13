@@ -153,3 +153,8 @@
   background: rgba(45, 157, 87, 0.15);
   color: var(--success);
 }
+
+.badgeCustom {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}

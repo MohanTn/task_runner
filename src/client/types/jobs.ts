@@ -1,3 +1,5 @@
+export type RunMode = 'single' | 'multiple';
+
 export interface Job {
   id: number;
   name: string;
@@ -5,6 +7,7 @@ export interface Job {
   command: string;
   enabled: boolean;
   timeout_seconds: number;
+  run_mode: RunMode;
   repo_id: number | null;
   prompt: string;
   repo_name?: string;
@@ -21,6 +24,7 @@ export interface JobCreateInput {
   prompt?: string;
   enabled?: boolean;
   timeout_seconds?: number;
+  run_mode?: RunMode;
 }
 
 export interface JobUpdateInput {
@@ -31,4 +35,5 @@ export interface JobUpdateInput {
   prompt?: string;
   enabled?: boolean;
   timeout_seconds?: number;
+  run_mode?: RunMode;
 }

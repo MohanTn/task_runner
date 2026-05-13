@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import type { Repo } from '../../types/repos.js';
+import type { CliConfig } from '../../types/cli-configs.js';
 import { repoApi } from '../../api/repos.api.js';
 import styles from './ReposTable.module.css';
 
 interface ReposTableProps {
   repos: Repo[];
+  cliConfigs: CliConfig[];
   onReposChanged: () => void;
 }
 
-export function ReposTable({ repos, onReposChanged }: ReposTableProps) {
+export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProps) {
   const [editingId, setEditingId] = useState<number | '__new' | null>(null);
   const [editName, setEditName] = useState('');
   const [editPath, setEditPath] = useState('');
-  const [editAiType, setEditAiType] = useState<'claude' | 'copilot'>('claude');
+  const [editAiType, setEditAiType] = useState<string>('claude');
   const [saving, setSaving] = useState(false);
 
   const startAdd = () => {
@@ -26,7 +28,7 @@ export function ReposTable({ repos, onReposChanged }: ReposTableProps) {
     setEditingId(repo.id);
     setEditName(repo.name);
     setEditPath(repo.path);
-    setEditAiType(repo.ai_type);
+    setEditAiType(repo.ai_type as string);
   };
 
   const cancelEdit = () => {
@@ -87,9 +89,10 @@ export function ReposTable({ repos, onReposChanged }: ReposTableProps) {
                   <input className={styles.inp} value={editPath} onChange={(e) => setEditPath(e.target.value)} />
                 </td>
                 <td>
-                  <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value as 'claude' | 'copilot')}>
-                    <option value="claude">claude</option>
-                    <option value="copilot">copilot</option>
+                  <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
+                    {cliConfigs.map((c) => (
+                      <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>
+                    ))}
                   </select>
                 </td>
                 <td className={styles.actions}>
@@ -101,7 +104,7 @@ export function ReposTable({ repos, onReposChanged }: ReposTableProps) {
               <tr key={repo.id}>
                 <td className={styles.cell}>{repo.name}</td>
                 <td className={styles.cellMono}>{repo.path}</td>
-                <td><span className={`${styles.badge} ${repo.ai_type === 'claude' ? styles.badgeClaude : styles.badgeCopilot}`}>{repo.ai_type}</span></td>
+                <td><span className={`${styles.badge} ${repo.ai_type === 'claude' ? styles.badgeClaude : repo.ai_type === 'copilot' ? styles.badgeCopilot : styles.badgeCustom}`}>{repo.ai_type}</span></td>
                 <td className={styles.actions}>
                   <button className={styles.linkBtn} onClick={() => startEdit(repo)}>Edit</button>
                   <button className={styles.linkBtnDanger} onClick={() => handleDelete(repo.id)}>Delete</button>
@@ -118,9 +121,10 @@ export function ReposTable({ repos, onReposChanged }: ReposTableProps) {
                 <input className={styles.inp} value={editPath} onChange={(e) => setEditPath(e.target.value)} placeholder="/home/user/project" />
               </td>
               <td>
-                <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value as 'claude' | 'copilot')}>
-                  <option value="claude">claude</option>
-                  <option value="copilot">copilot</option>
+                <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
+                  {cliConfigs.map((c) => (
+                    <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>
+                  ))}
                 </select>
               </td>
               <td className={styles.actions}>

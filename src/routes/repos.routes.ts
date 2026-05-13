@@ -6,7 +6,7 @@ interface Repo {
   id: number;
   name: string;
   path: string;
-  ai_type: 'claude' | 'copilot';
+  ai_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -30,7 +30,8 @@ export function createReposRouter(db: Database.Database): Router {
 
     if (!name?.trim()) throw new ValidationError('name is required');
     if (!path?.trim()) throw new ValidationError('path is required');
-    if (!['claude', 'copilot'].includes(ai_type)) throw new ValidationError('ai_type must be "claude" or "copilot"');
+    const knownCli = db.prepare('SELECT cli_name FROM cli_configs WHERE cli_name = ?').get(ai_type);
+    if (!knownCli) throw new ValidationError(`ai_type "${ai_type}" does not match any CLI config`);
 
     const existing = db.prepare('SELECT id FROM repos WHERE name = ?').get(name.trim());
     if (existing) throw new ConflictError(`Repo "${name}" already exists`);
@@ -58,8 +59,9 @@ export function createReposRouter(db: Database.Database): Router {
       if (existing) throw new ConflictError(`Repo "${name}" already exists`);
     }
 
-    if (ai_type !== undefined && !['claude', 'copilot'].includes(ai_type)) {
-      throw new ValidationError('ai_type must be "claude" or "copilot"');
+    if (ai_type !== undefined) {
+      const knownCli = db.prepare('SELECT cli_name FROM cli_configs WHERE cli_name = ?').get(ai_type);
+      if (!knownCli) throw new ValidationError(`ai_type "${ai_type}" does not match any CLI config`);
     }
 
     const updatedName = name?.trim() ?? repo.name;

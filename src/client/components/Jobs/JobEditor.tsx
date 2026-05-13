@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import type { Job, JobCreateInput, JobUpdateInput } from '../../types/jobs.js';
+import type { Job, JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
 import styles from './JobEditor.module.css';
 
 interface JobEditorProps {
@@ -13,6 +13,7 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
   const [repoPath, setRepoPath] = useState(job?.repo_path ?? '');
   const [command, setCommand] = useState(job?.command ?? '');
   const [timeoutSeconds, setTimeoutSeconds] = useState(job?.timeout_seconds ?? 1800);
+  const [runMode, setRunMode] = useState<RunMode>(job?.run_mode ?? 'multiple');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +32,7 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
         repo_path: repoPath.trim(),
         command: command.trim(),
         timeout_seconds: timeoutSeconds,
+        run_mode: runMode,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save job');
@@ -85,6 +87,30 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
             min={10}
             max={86400}
           />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Run Mode</label>
+          <div className={styles.scheduleToggle}>
+            <button
+              type="button"
+              className={`${styles.scheduleOption} ${runMode === 'multiple' ? styles.scheduleActive : ''}`}
+              onClick={() => setRunMode('multiple')}
+            >
+              <span className={styles.scheduleIcon}>∞</span>
+              <span className={styles.scheduleLabel}>Multiple</span>
+              <span className={styles.scheduleDesc}>Runs every trigger</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.scheduleOption} ${runMode === 'single' ? styles.scheduleActive : ''}`}
+              onClick={() => setRunMode('single')}
+            >
+              <span className={styles.scheduleIcon}>1</span>
+              <span className={styles.scheduleLabel}>Single</span>
+              <span className={styles.scheduleDesc}>Auto-disables after first run</span>
+            </button>
+          </div>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}

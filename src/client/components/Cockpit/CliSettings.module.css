@@ -1,7 +1,36 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
 .title {
   font-size: 1em;
   font-weight: 600;
-  margin-bottom: var(--space-sm);
+  margin: 0;
+}
+
+.addBtn {
+  padding: 4px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.hint {
+  margin-top: var(--space-sm);
+  font-size: 0.8em;
+  color: var(--text-2);
+}
+
+.hint code {
+  font-family: var(--font-mono);
+  background: rgba(255,255,255,0.06);
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
 .table {
@@ -75,6 +104,18 @@
 }
 
 .linkBtn:hover {
+  text-decoration: underline;
+}
+
+.linkBtnDanger {
+  background: none;
+  border: none;
+  color: var(--color-danger, #ef4444);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.linkBtnDanger:hover {
   text-decoration: underline;
 }
 

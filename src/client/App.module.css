@@ -1,289 +1,132 @@
 /* ─── Layout ─── */
 .app {
-  display: flex; flex-direction: column;
-  height: 100vh; overflow: hidden;
-}
-
-.tabContent {
-  flex: 1;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.header {
-  display: flex; align-items: center; gap: var(--space-3);
-  height: var(--header-h); padding: 0 var(--space-5);
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  font-size: 0.9em; flex-shrink: 0;
-}
-
-.brand {
-  font-weight: 600; letter-spacing: -0.01em;
-}
-
-.controls {
-  display: flex; align-items: center; gap: var(--space-5);
-  height: var(--control-h); padding: 0 var(--space-5);
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  flex-shrink: 0; font-size: 0.85em;
-}
-
-.controlGroup {
-  display: flex; align-items: center; gap: var(--space-3);
-}
-
-.statsRow {
-  display: flex; gap: 1px;
-  background: var(--border); border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.statBox {
-  display: flex; align-items: baseline; gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  background: var(--surface); flex: 1;
-  font-size: 0.85em;
-}
-
-.statVal {
-  font-family: var(--font-mono); font-size: 1.2em; font-weight: 600;
-  color: var(--accent); min-width: 24px;
-}
-
-.statLbl { color: var(--text); }
-.statSub { color: var(--text-2); font-size: 0.9em; margin-left: auto; }
-
-/* ─── Scrollable body ─── */
-.body {
-  flex: 1; overflow-y: auto;
-  padding: var(--space-4);
-  display: flex; flex-direction: column; gap: var(--space-5);
-}
-
-.section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.sectionHead {
-  display: flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border);
-}
-
-.sectionTitle {
-  font-size: 0.8em; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.04em; color: var(--text-2); flex: 1;
-}
-
-/* ─── Table ─── */
-.table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-
-.table th {
-  text-align: left; font-weight: 500; color: var(--text-2);
-  font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.03em;
-  padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-.table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); }
-
-.row:hover td { background: var(--surface-2); }
-.row:last-child td { border-bottom: none; }
-
-.cellName { font-weight: 500; }
-
-.emptyCell {
-  text-align: center; color: var(--text-2);
-  padding: var(--space-6) !important; font-size: 0.9em;
-}
-
-/* ─── Status ─── */
-.dot {
-  display: inline-block; width: 6px; height: 6px;
-  border-radius: 50%; flex-shrink: 0;
-}
-
-.statusCell {
-  display: inline-flex; align-items: center; gap: var(--space-2);
-  text-transform: capitalize;
-}
-
-/* ─── Buttons ─── */
-.linkBtn {
-  background: none; border: none; color: var(--accent);
-  font-size: 0.85em; padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius);
-}
-.linkBtn:hover { background: var(--surface-2); }
-
-.linkBtnDanger {
-  background: none; border: none;
-  color: var(--text-2); font-size: 0.85em;
-  padding: var(--space-1) var(--space-2); border-radius: var(--radius);
-}
-.linkBtnDanger:hover { color: var(--danger); background: var(--surface-2); }
-
-.btnGhost {
-  background: none; border: none; color: var(--accent);
-  font-size: 0.85em; padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius); cursor: pointer;
-}
-.btnGhost:hover { background: var(--surface-2); }
-
-.btnPrimary {
-  background: var(--accent); color: #fff; border: none;
-  font-size: 0.85em; padding: var(--space-1) var(--space-4);
-  border-radius: var(--radius); cursor: pointer; font-weight: 500;
-}
-.btnPrimary:hover { background: var(--accent-hover); }
-
-.btnOn {
-  background: var(--success); color: #fff; border: none;
-  font-size: 0.8em; font-weight: 600; padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius); cursor: pointer; text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.btnOff {
-  background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
-  font-size: 0.8em; font-weight: 600; padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius); cursor: pointer; text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.btnDanger {
-  background: transparent; border: 1px solid var(--danger);
-  color: var(--danger); font-size: 0.85em; padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius); cursor: pointer; font-weight: 500;
-}
-.btnDanger:hover { background: rgba(216,67,78,0.1); }
-
-/* ─── Inputs ─── */
-.inp {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: var(--space-2) var(--space-3);
-  color: var(--text); font-size: 0.85em; font-family: var(--font-mono);
-}
-.inp:focus { outline: none; border-color: var(--accent); }
-
-.inpNum {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: var(--space-2) var(--space-3);
-  color: var(--text); font-size: 0.85em; width: 64px; font-family: var(--font-mono);
-}
-.inpNum:focus { outline: none; border-color: var(--accent); }
-
-.inpCron {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: var(--space-1) var(--space-3);
-  color: var(--text); font-size: 0.8em; font-family: var(--font-mono); width: 110px;
-}
-.inpCron:focus { outline: none; border-color: var(--accent); }
-
-.select {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: var(--space-2) var(--space-3);
-  color: var(--text); font-size: 0.85em;
-}
-.select:focus { outline: none; border-color: var(--accent); }
-
-/* ─── Range slider ─── */
-.range {
-  -webkit-appearance: none; appearance: none;
-  width: 72px; height: 3px; background: var(--border);
-  border-radius: 2px; outline: none;
-}
-.range::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none;
-  width: 12px; height: 12px; border-radius: 50%;
-  background: var(--accent); cursor: pointer;
-  border: 1px solid var(--surface);
-}
-.rangeVal {
-  font-family: var(--font-mono); font-size: 0.9em;
-  color: var(--accent); font-weight: 600; min-width: 14px; text-align: center;
-}
-
-/* ─── Pills ─── */
-.pills {
-  display: flex; gap: 1px;
-  background: var(--border); border-radius: var(--radius);
+  height: 100vh;
   overflow: hidden;
 }
-.pill {
-  background: var(--bg); border: none; color: var(--text-2);
-  font-size: 0.75em; padding: var(--space-1) var(--space-3);
-  cursor: pointer; text-transform: lowercase;
-}
-.pill:hover { color: var(--text); }
-.pillActive { background: var(--accent); color: #fff; }
-.pillActive:hover { color: #fff; }
 
-/* ─── Edit inline row ─── */
-.editRow td { padding: var(--space-3); background: var(--surface-2); }
-.editForm {
-  display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
-}
-
-/* ─── Settings ─── */
-.settingsGrid {
-  display: flex; gap: var(--space-5); padding: var(--space-4);
-  flex-wrap: wrap;
-}
-.settingField {
-  display: flex; flex-direction: column; gap: var(--space-2);
-}
-.settingLabel {
-  font-size: 0.8em; color: var(--text-2); text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-/* ─── Overlay ─── */
+/* ─── Modal ─── */
 .overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 100;
 }
 
 .outputModal {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius);
-  width: 700px; max-width: 95vw;
-  max-height: 80vh; display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  width: 700px;
+  max-width: 95vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .outputHead {
-  display: flex; align-items: center; gap: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border);
-  font-size: 0.85em; font-weight: 500;
+  font-size: 0.82em;
+  font-weight: 500;
 }
-.outputHead .muted { flex: 1; }
+
+.outputHead .muted {
+  flex: 1;
+}
 
 .outputBody {
-  flex: 1; overflow: auto; padding: var(--space-4);
-  font-family: var(--font-mono); font-size: 0.8em; line-height: 1.5;
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  line-height: 1.5;
 }
 
-.stdout { white-space: pre-wrap; word-break: break-all; margin-bottom: var(--space-4); }
-.stderr { white-space: pre-wrap; word-break: break-all; color: var(--danger); }
-.stdinLine { color: var(--accent); margin-bottom: var(--space-1); }
+.stdout {
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-bottom: var(--space-4);
+}
+
+.stderr {
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--danger);
+}
+
+.stdinLine {
+  color: var(--accent);
+  margin-bottom: var(--space-1);
+}
 
 .stdinBar {
-  display: flex; gap: var(--space-2); align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
   padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--border); background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
 }
-.stdinInput {
-  flex: 1; background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: var(--space-2) var(--space-3);
-  color: var(--text); font-size: 0.85em; font-family: var(--font-mono);
-}
-.stdinInput:focus { outline: none; border-color: var(--accent); }
 
-/* ─── Utilities ─── */
-.spacer { flex: 1; }
-.muted { color: var(--text-2); }
+.stdinInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text);
+  font-size: 0.82em;
+  font-family: var(--font-mono);
+}
+
+.stdinInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ─── Shared elements ─── */
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.muted {
+  color: var(--text-2);
+}
+
+.btnGhost {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.82em;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.btnGhost:hover {
+  background: var(--surface-2);
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 0.82em;
+  padding: var(--space-1) var(--space-4);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btnPrimary:hover {
+  background: var(--accent-hover);
+}

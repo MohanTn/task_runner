@@ -1,0 +1,15 @@
+services:
+  task-runner:
+    build: .
+    container_name: task-runner
+    ports:
+      - "5222:5222"
+    volumes:
+      - ./data:/app/data
+      - /home/mohantn:/home/mohantn
+    environment:
+      - PORT=5222
+      - HOME=/home/mohantn
+      - USER=mohantn
+      - LOGNAME=mohantn
+    restart: unless-stopped

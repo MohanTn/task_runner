@@ -3,7 +3,7 @@ import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
 import { executionApi } from '../../api/executions.api.js';
 import { jobApi } from '../../api/jobs.api.js';
-import type { JobCreateInput, JobUpdateInput } from '../../types/jobs.js';
+import type { JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
 import { CronInput } from '../Common/CronInput.js';
 import { Slider } from '../Common/Slider.js';
 import { ReposTable } from './ReposTable.js';
@@ -98,6 +98,7 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
     repo_id: number;
     prompt: string;
     timeout_seconds: number;
+    run_mode: RunMode;
   }, jobId?: number) => {
     if (jobId) {
       await jobApi.update(jobId, data as JobUpdateInput);
@@ -148,7 +149,7 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
 
       {/* Repos */}
       <section className={styles.section}>
-        <ReposTable repos={repos} onReposChanged={refreshAll} />
+        <ReposTable repos={repos} cliConfigs={cliConfigs} onReposChanged={refreshAll} />
       </section>
 
       {/* Jobs */}

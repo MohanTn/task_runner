@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import Database from 'better-sqlite3';
-import type { Execution, ExecutionListOptions } from '../types.js';
+import type { Execution, ExecutionListOptions, Job } from '../types.js';
 import { NotFoundError, ValidationError } from '../errors.js';
-import { broadcastExecutionCreated } from '../broadcast.js';
+import { broadcastExecutionCreated, broadcastJobUpdated } from '../broadcast.js';
 import type { WorkerPool } from '../queue/worker-pool.js';
 
 export function createExecutionsRouter(
@@ -90,7 +90,7 @@ export function createExecutionsRouter(
     const { job_id } = req.body;
     if (!job_id) throw new ValidationError('job_id is required');
 
-    const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(Number(job_id));
+    const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(Number(job_id)) as Job | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
     const result = db
@@ -106,6 +106,15 @@ export function createExecutionsRouter(
 
     broadcastExecutionCreated(execution);
     workerPool.enqueue(execution);
+
+    if (job.run_mode === 'single') {
+      db.prepare(`UPDATE jobs SET enabled = 0, updated_at = datetime('now') WHERE id = ?`).run(job.id);
+      const updated = db
+        .prepare(`SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
+                  FROM jobs j LEFT JOIN repos r ON r.id = j.repo_id WHERE j.id = ?`)
+        .get(job.id) as object;
+      broadcastJobUpdated(updated);
+    }
 
     res.status(201).json(execution);
   });

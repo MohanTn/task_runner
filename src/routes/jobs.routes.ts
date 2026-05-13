@@ -7,6 +7,7 @@ import { broadcastJobUpdated } from '../broadcast.js';
 interface StoredJob extends Job {
   repo_id: number | null;
   prompt: string;
+  run_mode: 'single' | 'multiple';
 }
 
 function getJobWithRepo(db: Database.Database, id: number): object | undefined {
@@ -56,9 +57,11 @@ export function createJobsRouter(db: Database.Database): Router {
   });
 
   router.post('/', (req, res) => {
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds } = req.body;
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } = req.body;
 
     if (!name?.trim()) throw new ValidationError('name is required');
+
+    const finalRunMode = run_mode === 'single' ? 'single' : 'multiple';
 
     // Backward compat: allow direct repo_path + command
     // New flow: use repo_id + prompt to construct command
@@ -89,8 +92,8 @@ export function createJobsRouter(db: Database.Database): Router {
 
     const result = db
       .prepare(
-        `INSERT INTO jobs (name, repo_path, command, repo_id, prompt, enabled, timeout_seconds)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO jobs (name, repo_path, command, repo_id, prompt, enabled, timeout_seconds, run_mode)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         name.trim(),
@@ -100,6 +103,7 @@ export function createJobsRouter(db: Database.Database): Router {
         finalPrompt,
         enabled !== false ? 1 : 0,
         timeout_seconds ?? 1800,
+        finalRunMode,
       );
 
     const job = getJobWithRepo(db, Number(result.lastInsertRowid))!;
@@ -113,7 +117,7 @@ export function createJobsRouter(db: Database.Database): Router {
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds } = req.body;
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } = req.body;
 
     if (name !== undefined && !name.trim()) throw new ValidationError('name cannot be empty');
 
@@ -128,6 +132,7 @@ export function createJobsRouter(db: Database.Database): Router {
     const updatedRepoId = repo_id !== undefined ? repo_id : job.repo_id;
     const updatedPrompt = prompt !== undefined ? prompt : job.prompt;
     const updatedTimeout = timeout_seconds ?? job.timeout_seconds;
+    const updatedRunMode = run_mode === 'single' ? 'single' : run_mode === 'multiple' ? 'multiple' : job.run_mode;
 
     // Determine command: explicit command override, or reconstruct from template+prompt
     let updatedCommand: string;
@@ -153,9 +158,9 @@ export function createJobsRouter(db: Database.Database): Router {
 
     db.prepare(
       `UPDATE jobs SET name = ?, repo_path = ?, command = ?, repo_id = ?, prompt = ?,
-       enabled = ?, timeout_seconds = ?, updated_at = datetime('now')
+       enabled = ?, timeout_seconds = ?, run_mode = ?, updated_at = datetime('now')
        WHERE id = ?`,
-    ).run(updatedName, updatedRepoPath, updatedCommand, updatedRepoId, updatedPrompt, updatedEnabled, updatedTimeout, job.id);
+    ).run(updatedName, updatedRepoPath, updatedCommand, updatedRepoId, updatedPrompt, updatedEnabled, updatedTimeout, updatedRunMode, job.id);
 
     const updated = getJobWithRepo(db, job.id)!;
     broadcastJobUpdated(updated);

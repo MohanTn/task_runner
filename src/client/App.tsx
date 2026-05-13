@@ -1,28 +1,30 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { AppStateProvider, useAppState } from './state/AppState.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
 import { executionApi } from './api/executions.api.js';
 import type { Execution } from './types/executions.js';
-import { Navigation, type Tab } from './components/Common/Navigation.js';
-import { Cockpit } from './components/Cockpit/Cockpit.js';
-import { JobList } from './components/Jobs/JobList.js';
-import { ExecutionHistory } from './components/ExecutionHistory/ExecutionHistory.js';
-import { SettingsPanel } from './components/Settings/SettingsPanel.js';
+import { Navigation } from './components/Common/Navigation.js';
+import { MissionControl } from './components/Cockpit/MissionControl.js';
 import styles from './App.module.css';
 
-/* ─── Status Dot ─── */
+type WsData = Record<string, unknown>;
+type LiveOutputs = Record<number, { out: string; err: string }>;
+
+const STATUS_COLORS: Record<string, string> = {
+  running: 'var(--accent)',
+  completed: 'var(--success)',
+  failed: 'var(--danger)',
+  pending: 'var(--warning)',
+  cancelled: 'var(--text-2)',
+  enabled: 'var(--success)',
+  disabled: 'var(--text-2)',
+};
+
 function Dot({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    running: 'var(--accent)',
-    completed: 'var(--success)',
-    failed: 'var(--danger)',
-    pending: 'var(--warning)',
-    cancelled: 'var(--text-2)',
-    enabled: 'var(--success)',
-    disabled: 'var(--text-2)',
-  };
-  return <span className={styles.dot} style={{ background: map[status] || 'var(--text-2)' }} />;
+  return <span className={styles.dot} style={{ background: STATUS_COLORS[status] || 'var(--text-2)' }} />;
 }
+
+function stopProp(e: { stopPropagation: () => void }) { e.stopPropagation(); }
 
 /* ─── Execution Output Modal (live streaming + stdin) ─── */
 function OutputModal({
@@ -36,9 +38,10 @@ function OutputModal({
   onClose: () => void;
   onStdin: (id: number, input: string) => void;
 }) {
+  const showLoading = !initial.output && !initial.error_output && !liveOutput;
   const [fetchOut, setFetchOut] = useState('');
   const [fetchErr, setFetchErr] = useState('');
-  const [loading, setLoading] = useState(!initial.output && !initial.error_output && !liveOutput);
+  const [loading, setLoading] = useState(showLoading);
   const [stdinText, setStdinText] = useState('');
   const [sentLines, setSentLines] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -71,13 +74,17 @@ function OutputModal({
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
+  const handleStdinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStdinText(e.target.value);
+  };
+
   const started = initial.started_at ? new Date(initial.started_at).toLocaleString() : '-';
   const took = initial.started_at && initial.completed_at
     ? `${Math.round((new Date(initial.completed_at).getTime() - new Date(initial.started_at).getTime()) / 1000)}s` : (isRunning ? 'running…' : '-');
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.outputModal} onClick={(e) => e.stopPropagation()}>
+      <div className={styles.outputModal} onClick={stopProp}>
         <div className={styles.outputHead}>
           <span>Execution #{initial.id} <Dot status={initial.status} />{initial.status}</span>
           <span className={styles.muted}>exit={initial.exit_code ?? '-'} pid={initial.worker_pid ?? '-'} {took} {started}</span>
@@ -99,7 +106,7 @@ function OutputModal({
             <input
               className={styles.stdinInput}
               value={stdinText}
-              onChange={(e) => setStdinText(e.target.value)}
+              onChange={handleStdinChange}
               onKeyDown={handleStdinKey}
               placeholder="type input for the running process…"
               autoFocus
@@ -114,18 +121,12 @@ function OutputModal({
 
 /* ─── Main App Content ─── */
 function AppContent() {
-  const { settings, refreshAll, applyExecutionUpdate, applyPoolStats } = useAppState();
+  const { applyExecutionUpdate, applyPoolStats } = useAppState();
   const [wsConnected, setWsConnected] = useState(false);
-  const [activeTab, setActiveTab] = useState<Tab>('cockpit');
-
-  /* live output streaming state */
-  const [liveOutputs, setLiveOutputs] = useState<Record<number, { out: string; err: string }>>({});
+  const [liveOutputs, setLiveOutputs] = useState<LiveOutputs>({});
   const [outputExec, setOutputExec] = useState<Execution | null>(null);
 
-  const cronOn = settings?.cron_enabled === true;
-
-  /* WS message handler for live streaming + state sync */
-  const onWsMessage = useCallback((data: Record<string, unknown>) => {
+  const onWsMessage = (data: WsData) => {
     switch (data.type) {
       case 'execution-output': {
         const id = data.executionId as number;
@@ -144,16 +145,13 @@ function AppContent() {
         if (exec) applyExecutionUpdate(exec);
         break;
       }
-      case 'execution-started': {
-        break;
-      }
       case 'worker-pool-stats': {
-        const { active, pending, maxParallel } = data as any;
-        applyPoolStats({ active, pending, maxParallel });
+        const stats = data as { active: number; pending: number; maxParallel: number };
+        applyPoolStats({ active: stats.active, pending: stats.pending, maxParallel: stats.maxParallel });
         break;
       }
     }
-  }, [applyExecutionUpdate, applyPoolStats]);
+  };
 
   useWebSocket({
     onMessage: onWsMessage,
@@ -165,24 +163,17 @@ function AppContent() {
     try { await executionApi.sendStdin(execId, input); } catch { /* ignore */ }
   };
 
+  const handleCloseOutput = () => setOutputExec(null);
+
   return (
     <div className={styles.app}>
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} connected={wsConnected} />
-
-      {/* Tab content */}
-      <div className={styles.tabContent}>
-        {activeTab === 'cockpit' && <Cockpit onShowOutput={setOutputExec} />}
-        {activeTab === 'jobs' && <JobList />}
-        {activeTab === 'history' && <ExecutionHistory />}
-        {activeTab === 'settings' && <SettingsPanel />}
-      </div>
-
-      {/* ─── OUTPUT MODAL ─── */}
+      <Navigation connected={wsConnected} />
+      <MissionControl onShowOutput={setOutputExec} liveOutputs={liveOutputs} />
       {outputExec && (
         <OutputModal
           execution={outputExec}
           liveOutput={liveOutputs[outputExec.id]}
-          onClose={() => setOutputExec(null)}
+          onClose={handleCloseOutput}
           onStdin={handleStdin}
         />
       )}

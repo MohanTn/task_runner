@@ -131,3 +131,23 @@
   padding: var(--space-lg) !important;
   font-size: 0.9em;
 }
+
+.scheduleBadge {
+  display: inline-block;
+  font-size: 0.75em;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+
+.scheduleCron {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent);
+}
+
+.scheduleManual {
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}

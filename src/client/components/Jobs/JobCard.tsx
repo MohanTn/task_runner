@@ -41,6 +41,12 @@ export function JobCard({ job, onEdit, onToggled }: JobCardProps) {
               title={job.enabled ? 'Enabled' : 'Disabled'}
             />
           </div>
+          <span
+            className={`${styles.scheduleBadge} ${job.run_mode === 'single' ? styles.scheduleCron : styles.scheduleManual}`}
+            title={job.run_mode === 'single' ? 'Auto-disables after first run' : 'Runs every trigger'}
+          >
+            {job.run_mode === 'single' ? '1 Single' : '∞ Multiple'}
+          </span>
         </div>
 
         <div className={styles.details}>

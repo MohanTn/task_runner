@@ -1,5 +1,6 @@
 export type ExecutionStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 export type TriggerType = 'cron' | 'manual';
+export type RunMode = 'single' | 'multiple';
 
 export interface Job {
   id: number;
@@ -8,6 +9,7 @@ export interface Job {
   command: string;
   enabled: boolean;
   timeout_seconds: number;
+  run_mode: RunMode;
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +20,7 @@ export interface JobCreateInput {
   command: string;
   enabled?: boolean;
   timeout_seconds?: number;
+  run_mode?: RunMode;
 }
 
 export interface JobUpdateInput {
@@ -26,6 +29,7 @@ export interface JobUpdateInput {
   command?: string;
   enabled?: boolean;
   timeout_seconds?: number;
+  run_mode?: RunMode;
 }
 
 export interface Execution {

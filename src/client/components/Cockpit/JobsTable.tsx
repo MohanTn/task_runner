@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Job } from '../../types/jobs.js';
+import type { Job, RunMode } from '../../types/jobs.js';
 import type { Repo } from '../../types/repos.js';
 import type { CliConfig } from '../../types/cli-configs.js';
 import { JobPromptEditor } from './JobPromptEditor.js';
@@ -12,16 +12,18 @@ interface JobsTableProps {
   onRun: (jobId: number) => void;
   onToggle: (jobId: number) => void;
   onDelete: (jobId: number) => void;
+  onEdit?: (job: Job) => void;
   onSave: (data: {
     name: string;
     repo_id: number;
     prompt: string;
     timeout_seconds: number;
+    run_mode: RunMode;
   }, jobId?: number) => Promise<void>;
   onJobsChanged: () => void;
 }
 
-export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, onSave, onJobsChanged }: JobsTableProps) {
+export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, onEdit, onSave, onJobsChanged }: JobsTableProps) {
   const [editing, setEditing] = useState<{ job?: Job } | null>(null);
 
   return (
@@ -35,6 +37,7 @@ export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, 
           <tr>
             <th>Name</th>
             <th>Status</th>
+            <th>Run Mode</th>
             <th>Repo</th>
             <th>Command</th>
             <th>Timeout</th>
@@ -48,7 +51,13 @@ export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, 
               <td>
                 <span
                   className={`${styles.dot} ${job.enabled ? styles.dotOn : styles.dotOff}`}
+                  title={job.enabled ? 'Enabled' : 'Disabled'}
                 />
+              </td>
+              <td>
+                <span className={`${styles.scheduleBadge} ${job.run_mode === 'single' ? styles.scheduleCron : styles.scheduleManual}`}>
+                  {job.run_mode === 'single' ? '1 Single' : '∞ Multiple'}
+                </span>
               </td>
               <td className={styles.repoCell}>{job.repo_name ?? '-'}</td>
               <td className={styles.cmdCell}>
@@ -60,14 +69,14 @@ export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, 
                 <button className={styles.linkBtn} onClick={() => onToggle(job.id)}>
                   {job.enabled ? 'Disable' : 'Enable'}
                 </button>
-                <button className={styles.linkBtn} onClick={() => setEditing({ job })}>Edit</button>
+                <button className={styles.linkBtn} onClick={() => { if (onEdit) onEdit(job); else setEditing({ job }); }}>Edit</button>
                 <button className={styles.linkBtnDanger} onClick={() => onDelete(job.id)}>Delete</button>
               </td>
             </tr>
           ))}
           {jobs.length === 0 && (
             <tr>
-              <td className={styles.emptyCell} colSpan={6}>No jobs configured. Click "+ Add" to create one.</td>
+              <td className={styles.emptyCell} colSpan={7}>No jobs configured. Click &quot;+ Add&quot; to create one.</td>
             </tr>
           )}
         </tbody>
@@ -80,6 +89,7 @@ export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, 
           cliConfigs={cliConfigs}
           onSave={async (data) => {
             await onSave(data, editing.job?.id);
+            setEditing(null);
           }}
           onCancel={() => setEditing(null)}
         />

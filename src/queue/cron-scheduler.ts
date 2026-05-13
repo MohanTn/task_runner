@@ -2,12 +2,12 @@ import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import Database from 'better-sqlite3';
 import type { Job, Execution } from '../types.js';
-import { broadcastExecutionCreated, broadcastCronStatus } from '../broadcast.js';
+import { broadcastExecutionCreated, broadcastCronStatus, broadcastJobUpdated } from '../broadcast.js';
 
 export class CronScheduler extends EventEmitter {
   private cronJob: CronJob | null = null;
   private running: boolean = false;
-  private expression: string = '*/5 * * * *';
+  private expression: string = '* * * * *';
   private db: Database.Database;
 
   constructor(db: Database.Database) {
@@ -46,7 +46,6 @@ export class CronScheduler extends EventEmitter {
   }
 
   activeJobCount(): number {
-    // Return count of enabled jobs that will fire on next tick
     const count = this.db
       .prepare('SELECT COUNT(*) as c FROM jobs WHERE enabled = 1')
       .get() as { c: number };
@@ -74,7 +73,7 @@ export class CronScheduler extends EventEmitter {
       );
     } catch {
       // Invalid cron expression, try fallback
-      this.expression = '*/5 * * * *';
+      this.expression = '* * * * *';
       this.cronJob = new CronJob(
         this.expression,
         () => this.onTick(),
@@ -104,6 +103,10 @@ export class CronScheduler extends EventEmitter {
        VALUES (?, 'pending', 'cron')`,
     );
 
+    const disableJob = this.db.prepare(
+      `UPDATE jobs SET enabled = 0, updated_at = datetime('now') WHERE id = ?`,
+    );
+
     for (const job of jobs) {
       const result = insert.run(job.id);
       const execution = this.db
@@ -112,6 +115,15 @@ export class CronScheduler extends EventEmitter {
 
       broadcastExecutionCreated(execution);
       this.emit('execution:enqueued', execution);
+
+      if (job.run_mode === 'single') {
+        disableJob.run(job.id);
+        const updated = this.db
+          .prepare(`SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
+                    FROM jobs j LEFT JOIN repos r ON r.id = j.repo_id WHERE j.id = ?`)
+          .get(job.id) as object;
+        broadcastJobUpdated(updated);
+      }
     }
   }
 }

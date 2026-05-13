@@ -1,4 +1,5 @@
 import { ChildProcess } from 'child_process';
+import process from 'process';
 import Database from 'better-sqlite3';
 import type { Execution, Job } from '../types.js';
 import { spawnCommand, type WSLMode } from './terminal-spawner.js';
@@ -19,6 +20,7 @@ export class Worker {
   private errorBuffer: string = '';
   private lastChunkTime: number = 0;
   private chunkTimer: ReturnType<typeof setInterval> | null = null;
+  private finished = false;
 
   constructor(
     private execution: Execution,
@@ -32,6 +34,17 @@ export class Worker {
     const update = this.db.prepare(
       `UPDATE executions SET status = 'running', started_at = datetime('now'), worker_pid = ? WHERE id = ?`,
     );
+
+    // ── Terminal status header (streamed live into the page) ──
+    const header = [
+      `> wsl terminal opened (${this.getPlatformLabel()})`,
+      `> switching to repo folder: ${this.job.repo_path}`,
+    ];
+    for (const line of header) {
+      const msg = `${line}\n`;
+      this.outputBuffer += msg;
+      broadcastExecutionOutput(this.execution.id, 'stdout', msg);
+    }
 
     const { process: child, platform } = spawnCommand(
       this.job.repo_path,
@@ -47,6 +60,11 @@ export class Worker {
     this.execution.started_at = new Date().toISOString();
 
     broadcastExecutionStarted(this.execution);
+
+    // ── Command-execution line (also live-streamed) ──
+    const execMsg = `> executing claude: ${this.job.command}\n`;
+    this.outputBuffer += execMsg;
+    broadcastExecutionOutput(this.execution.id, 'stdout', execMsg);
 
     child.stdout?.on('data', (chunk: Buffer) => {
       const text = chunk.toString();
@@ -64,9 +82,9 @@ export class Worker {
       this.throttledChunk('stderr', text);
     });
 
-    child.on('close', (exitCode: number | null) => {
+    child.on('close', (exitCode: number | null, signal: string | null) => {
       this.cleanup();
-      this.finish(exitCode);
+      this.finish(exitCode, signal);
     });
 
     child.on('error', (err: Error) => {
@@ -76,7 +94,7 @@ export class Worker {
 
     this.timeoutTimer = setTimeout(() => {
       this.handleTimeout();
-    }, this.job.timeout_seconds * 1000);
+    }, Math.max(1, this.job.timeout_seconds ?? 1800) * 1000);
   }
 
   writeStdin(input: string): void {
@@ -87,6 +105,8 @@ export class Worker {
   }
 
   abort(): void {
+    if (this.finished) return;
+    this.finished = true;
     this.cleanup();
     if (this.process) {
       this.process.kill('SIGTERM');
@@ -94,9 +114,11 @@ export class Worker {
     }
     this.db
       .prepare(
-        `UPDATE executions SET status = 'cancelled', completed_at = datetime('now') WHERE id = ?`,
+        `UPDATE executions SET status = 'cancelled', output = ?, completed_at = datetime('now') WHERE id = ?`,
       )
-      .run(this.execution.id);
+      .run(this.outputBuffer, this.execution.id);
+    this.execution.status = 'cancelled';
+    this.execution.output = this.outputBuffer;
     this.onComplete(this.execution.id);
   }
 
@@ -108,18 +130,35 @@ export class Worker {
     }
   }
 
-  private finish(exitCode: number | null): void {
+  private finish(exitCode: number | null, signal: string | null = null): void {
+    if (this.finished) return;
+    this.finished = true;
+
     const status = exitCode === 0 ? 'completed' : 'failed';
+    const code = exitCode ?? (signal ? -1 : -1);
+
+    let errorOutput = this.errorBuffer;
+    if (status === 'failed' && !errorOutput) {
+      if (signal) {
+        errorOutput = `Process killed by signal ${signal}`;
+      } else if (exitCode !== null) {
+        errorOutput = `Process exited with code ${exitCode}`;
+      } else {
+        errorOutput = 'Process exited with unknown status';
+      }
+    }
 
     this.db
       .prepare(
         `UPDATE executions SET status = ?, exit_code = ?, output = ?, error_output = ?,
          completed_at = datetime('now') WHERE id = ?`,
       )
-      .run(status, exitCode ?? -1, this.outputBuffer, this.errorBuffer, this.execution.id);
+      .run(status, code, this.outputBuffer, errorOutput, this.execution.id);
 
     this.execution.status = status;
-    this.execution.exit_code = exitCode ?? -1;
+    this.execution.exit_code = code;
+    this.execution.output = this.outputBuffer;
+    this.execution.error_output = errorOutput;
 
     if (status === 'completed') {
       broadcastExecutionCompleted(this.execution);
@@ -131,32 +170,46 @@ export class Worker {
   }
 
   private fail(error: string): void {
+    if (this.finished) return;
+    this.finished = true;
+
     this.db
       .prepare(
-        `UPDATE executions SET status = 'failed', error_output = ?,
+        `UPDATE executions SET status = 'failed', exit_code = -1, error_output = ?,
          completed_at = datetime('now') WHERE id = ?`,
       )
       .run(error.slice(0, MAX_OUTPUT_LENGTH), this.execution.id);
 
     this.execution.status = 'failed';
+    this.execution.exit_code = -1;
+    this.execution.error_output = error;
     broadcastExecutionFailed(this.execution, error);
     this.onComplete(this.execution.id);
   }
 
   private handleTimeout(): void {
+    if (this.finished) return;
+    this.finished = true;
+
     if (this.process) {
       this.process.kill('SIGTERM');
       setTimeout(() => this.process?.kill('SIGKILL'), 5000);
     }
     this.db
       .prepare(
-        `UPDATE executions SET status = 'failed', exit_code = -1,
-         error_output = error_output || '\n[TIMEOUT] Job exceeded ${this.job.timeout_seconds}s',
+        `UPDATE executions SET status = 'failed', exit_code = -1, output = ?,
+         error_output = ?,
          completed_at = datetime('now') WHERE id = ?`,
       )
-      .run(this.execution.id);
+      .run(
+        this.outputBuffer,
+        (this.execution.error_output || '') + `\n[TIMEOUT] Job exceeded ${this.job.timeout_seconds}s`,
+        this.execution.id,
+      );
 
     this.execution.status = 'failed';
+    this.execution.exit_code = -1;
+    this.execution.error_output = `Timeout after ${this.job.timeout_seconds}s`;
     broadcastExecutionFailed(this.execution, `Timeout after ${this.job.timeout_seconds}s`);
     this.onComplete(this.execution.id);
   }
@@ -170,5 +223,12 @@ export class Worker {
       clearInterval(this.chunkTimer);
       this.chunkTimer = null;
     }
+  }
+
+  private getPlatformLabel(): string {
+    if (process.platform === 'darwin') return 'macOS';
+    if (process.platform === 'win32') return 'Windows';
+    if (process.env.WSL_DISTRO_NAME || process.env.WSLENV) return 'WSL';
+    return 'Linux';
   }
 }

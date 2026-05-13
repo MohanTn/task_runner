@@ -12,6 +12,7 @@ export function Dashboard() {
   const pendingExecs = executions.filter((e) => e.status === 'pending');
 
   const activeJobs = jobs.filter((j) => j.enabled).length;
+  const singleRunJobs = jobs.filter((j) => j.run_mode === 'single').length;
   const failedToday = executionStats?.failed ?? 0;
   const completedToday = executionStats?.completed ?? 0;
 
@@ -47,7 +48,7 @@ export function Dashboard() {
         <div className={styles.statCard}>
           <span className={styles.statValue}>{jobs.length}</span>
           <span className={styles.statLabel}>Total Jobs</span>
-          <span className={styles.statSub}>{activeJobs} active</span>
+          <span className={styles.statSub}>{activeJobs} active · {singleRunJobs} single-run</span>
         </div>
         <div className={styles.statCard}>
           <span className={styles.statValue}>{runningExecs.length}</span>
@@ -142,6 +143,9 @@ export function Dashboard() {
                 onClick={() => handleManualTrigger(job.id)}
               >
                 <strong>{job.name}</strong>
+                <span className={`${styles.quickBadge} ${job.run_mode === 'single' ? styles.quickBadgeCron : styles.quickBadgeManual}`}>
+                  {job.run_mode === 'single' ? '1 Single' : '∞ Multiple'}
+                </span>
               </button>
             ))}
           </div>
