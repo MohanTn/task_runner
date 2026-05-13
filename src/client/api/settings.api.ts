@@ -21,10 +21,6 @@ class SettingsApi extends BaseClient {
   health(): Promise<HealthStatus> {
     return this.get('/api/control/health');
   }
-
-  cancelAll(): Promise<{ success: boolean }> {
-    return this.post('/api/control/worker/cancel-all');
-  }
 }
 
 export const settingsApi = new SettingsApi();

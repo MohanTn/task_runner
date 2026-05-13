@@ -5,23 +5,14 @@ import { executionApi } from '../../api/executions.api.js';
 import { jobApi } from '../../api/jobs.api.js';
 import type { JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
 import { CronInput } from '../Common/CronInput.js';
-import { Slider } from '../Common/Slider.js';
 import { ReposTable } from './ReposTable.js';
 import { JobsTable } from './JobsTable.js';
-import { QueueTable } from './QueueTable.js';
 import { CliSettings } from './CliSettings.js';
-import type { Execution } from '../../types/executions.js';
 import styles from './Cockpit.module.css';
 
-interface CockpitProps {
-  onShowOutput: (exec: Execution) => void;
-}
-
-export function Cockpit({ onShowOutput }: CockpitProps) {
+export function Cockpit() {
   const {
     jobs,
-    executions,
-    poolStats,
     settings,
     repos,
     cliConfigs,
@@ -29,15 +20,12 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
   } = useAppState();
 
   const [savingSchedule, setSavingSchedule] = useState(false);
-
   const cronOn = settings?.cron_enabled === true;
   const [cronExpr, setCronExpr] = useState('*/5 * * * *');
-  const [workers, setWorkers] = useState(2);
 
   useEffect(() => {
     if (settings) {
       setCronExpr(settings.cron_expression ?? '*/5 * * * *');
-      setWorkers(settings.max_parallel_workers ?? 2);
     }
   }, [settings]);
 
@@ -53,17 +41,14 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
   const handleScheduleSave = useCallback(async () => {
     setSavingSchedule(true);
     try {
-      await settingsApi.update({
-        cron_expression: cronExpr,
-        max_parallel_workers: workers,
-      });
+      await settingsApi.update({ cron_expression: cronExpr });
       await refreshAll();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to save schedule');
     } finally {
       setSavingSchedule(false);
     }
-  }, [cronExpr, workers, refreshAll]);
+  }, [cronExpr, refreshAll]);
 
   const handleRun = useCallback(async (jobId: number) => {
     try {
@@ -118,16 +103,6 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
             <label className={styles.fieldLabel}>Cron Expression</label>
             <CronInput value={cronExpr} onChange={setCronExpr} />
           </div>
-          <div className={styles.scheduleField}>
-            <label className={styles.fieldLabel}>Workers: {workers}</label>
-            <Slider
-              label=""
-              value={workers}
-              min={1}
-              max={10}
-              onChange={setWorkers}
-            />
-          </div>
           <div className={styles.scheduleActions}>
             <button
               className={`${styles.toggleBtn} ${cronOn ? styles.toggleOn : styles.toggleOff}`}
@@ -140,11 +115,6 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
             </button>
           </div>
         </div>
-        {poolStats && (
-          <p className={styles.poolInfo}>
-            {poolStats.active} active · {poolStats.pending} queued · max {poolStats.maxParallel}
-          </p>
-        )}
       </section>
 
       {/* Repos */}
@@ -164,11 +134,6 @@ export function Cockpit({ onShowOutput }: CockpitProps) {
           onSave={handleJobSave}
           onJobsChanged={refreshAll}
         />
-      </section>
-
-      {/* Queue */}
-      <section className={styles.section}>
-        <QueueTable executions={executions} onShowOutput={onShowOutput} />
       </section>
 
       {/* CLI Settings */}

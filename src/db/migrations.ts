@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 
-const SCHEMA_VERSION = 8;
+const SCHEMA_VERSION = 9;
 
 export function runMigrations(db: Database.Database): void {
   const currentVersion = db.pragma('user_version', { simple: true }) as number;
@@ -23,34 +23,12 @@ export function runMigrations(db: Database.Database): void {
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
 
-      CREATE TABLE IF NOT EXISTS executions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
-        status TEXT NOT NULL DEFAULT 'pending'
-          CHECK (status IN ('pending','running','completed','failed','cancelled')),
-        exit_code INTEGER,
-        output TEXT NOT NULL DEFAULT '',
-        error_output TEXT NOT NULL DEFAULT '',
-        started_at TEXT,
-        completed_at TEXT,
-        triggered_by TEXT NOT NULL DEFAULT 'cron'
-          CHECK (triggered_by IN ('cron','manual')),
-        worker_pid INTEGER,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_executions_job_id ON executions(job_id);
-      CREATE INDEX IF NOT EXISTS idx_executions_status ON executions(status);
-
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
       );
 
       INSERT OR IGNORE INTO settings (key, value) VALUES ('cron_enabled', 'false');
-      INSERT OR IGNORE INTO settings (key, value) VALUES ('max_parallel_workers', '2');
-      INSERT OR IGNORE INTO settings (key, value) VALUES ('wsl_mode', '"auto"');
-      INSERT OR IGNORE INTO settings (key, value) VALUES ('keep_execution_days', '30');
       INSERT OR IGNORE INTO settings (key, value) VALUES ('cron_expression', '"* * * * *"');
 
       CREATE TABLE IF NOT EXISTS repos (
@@ -266,11 +244,13 @@ export function runMigrations(db: Database.Database): void {
       DROP TABLE jobs;
       ALTER TABLE jobs_new RENAME TO jobs;
 
-      CREATE INDEX IF NOT EXISTS idx_executions_job_id ON executions(job_id);
-      CREATE INDEX IF NOT EXISTS idx_executions_status ON executions(status);
-
       PRAGMA foreign_keys = ON;
     `);
+  }
+
+  // v8 -> v9: remove executions table (jobs now launch directly in Windows Terminal)
+  if (currentVersion === 8) {
+    db.exec(`DROP TABLE IF EXISTS executions`);
   }
 
   db.pragma(`user_version = ${SCHEMA_VERSION}`);

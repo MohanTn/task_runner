@@ -2,7 +2,6 @@ import { Router } from 'express';
 import Database from 'better-sqlite3';
 import type { Job } from '../types.js';
 import { NotFoundError, ValidationError, ConflictError } from '../errors.js';
-import { broadcastJobUpdated } from '../broadcast.js';
 
 interface StoredJob extends Job {
   repo_id: number | null;
@@ -63,8 +62,6 @@ export function createJobsRouter(db: Database.Database): Router {
 
     const finalRunMode = run_mode === 'single' ? 'single' : 'multiple';
 
-    // Backward compat: allow direct repo_path + command
-    // New flow: use repo_id + prompt to construct command
     let finalCommand: string;
     let finalRepoPath: string;
     let finalRepoId: number | null = repo_id ?? null;
@@ -74,7 +71,6 @@ export function createJobsRouter(db: Database.Database): Router {
       const constructed = buildCommand(db, repo_id, prompt);
       if (!constructed) throw new ValidationError('Could not construct command from repo and prompt');
       finalCommand = constructed;
-      // Resolve repo path from the repos table
       const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(repo_id) as { path: string } | undefined;
       if (!repo) throw new ValidationError('Repo not found');
       finalRepoPath = repo.path;
@@ -106,9 +102,7 @@ export function createJobsRouter(db: Database.Database): Router {
         finalRunMode,
       );
 
-    const job = getJobWithRepo(db, Number(result.lastInsertRowid))!;
-    broadcastJobUpdated(job);
-    res.status(201).json(job);
+    res.status(201).json(getJobWithRepo(db, Number(result.lastInsertRowid))!);
   });
 
   router.put('/:id', (req, res) => {
@@ -134,7 +128,6 @@ export function createJobsRouter(db: Database.Database): Router {
     const updatedTimeout = timeout_seconds ?? job.timeout_seconds;
     const updatedRunMode = run_mode === 'single' ? 'single' : run_mode === 'multiple' ? 'multiple' : job.run_mode;
 
-    // Determine command: explicit command override, or reconstruct from template+prompt
     let updatedCommand: string;
     if (command !== undefined && command?.trim()) {
       updatedCommand = command.trim();
@@ -145,7 +138,6 @@ export function createJobsRouter(db: Database.Database): Router {
       updatedCommand = job.command;
     }
 
-    // Resolve repo_path from the repo if repo_id is set
     let updatedRepoPath: string;
     if (updatedRepoId) {
       const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(updatedRepoId) as { path: string } | undefined;
@@ -162,9 +154,7 @@ export function createJobsRouter(db: Database.Database): Router {
        WHERE id = ?`,
     ).run(updatedName, updatedRepoPath, updatedCommand, updatedRepoId, updatedPrompt, updatedEnabled, updatedTimeout, updatedRunMode, job.id);
 
-    const updated = getJobWithRepo(db, job.id)!;
-    broadcastJobUpdated(updated);
-    res.json(updated);
+    res.json(getJobWithRepo(db, job.id)!);
   });
 
   router.delete('/:id', (req, res) => {
@@ -173,10 +163,7 @@ export function createJobsRouter(db: Database.Database): Router {
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
-    db.prepare('DELETE FROM executions WHERE job_id = ?').run(job.id);
     db.prepare('DELETE FROM jobs WHERE id = ?').run(job.id);
-
-    broadcastJobUpdated({ id: job.id, deleted: true });
     res.json({ success: true });
   });
 
@@ -189,9 +176,7 @@ export function createJobsRouter(db: Database.Database): Router {
     const newEnabled = job.enabled ? 0 : 1;
     db.prepare('UPDATE jobs SET enabled = ?, updated_at = datetime(\'now\') WHERE id = ?').run(newEnabled, job.id);
 
-    const updated = getJobWithRepo(db, job.id)!;
-    broadcastJobUpdated(updated);
-    res.json(updated);
+    res.json(getJobWithRepo(db, job.id)!);
   });
 
   return router;

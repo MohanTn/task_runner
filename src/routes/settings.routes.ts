@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import Database from 'better-sqlite3';
 import type { Settings } from '../types.js';
-import { broadcastSettingsChanged } from '../broadcast.js';
-import type { WorkerPool } from '../queue/worker-pool.js';
 import type { CronScheduler } from '../queue/cron-scheduler.js';
 
 function parseSettings(db: Database.Database): Settings {
@@ -23,7 +21,6 @@ function parseSettings(db: Database.Database): Settings {
 
 export function createSettingsRouter(
   db: Database.Database,
-  workerPool: WorkerPool,
   cronScheduler: CronScheduler,
 ): Router {
   const router = Router();
@@ -40,11 +37,6 @@ export function createSettingsRouter(
 
     for (const [key, value] of Object.entries(body)) {
       upsert.run(key, JSON.stringify(value));
-      broadcastSettingsChanged(key, value);
-    }
-
-    if (body.max_parallel_workers !== undefined) {
-      workerPool.setMaxParallel(body.max_parallel_workers);
     }
 
     if (body.cron_enabled !== undefined) {
@@ -53,10 +45,6 @@ export function createSettingsRouter(
       } else {
         cronScheduler.stop();
       }
-    }
-
-    if (body.wsl_mode !== undefined) {
-      workerPool.setWslMode(body.wsl_mode);
     }
 
     if (body.cron_expression !== undefined) {
