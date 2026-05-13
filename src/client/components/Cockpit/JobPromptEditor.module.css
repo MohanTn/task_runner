@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-xl);
+  max-width: 560px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.title {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.input, .select {
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.textarea {
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.cliHint {
+  font-size: 0.75em;
+  color: var(--text-2);
+}
+
+.preview {
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.85em;
+  padding: 8px 12px;
+  background: rgba(216, 67, 78, 0.1);
+  border-radius: var(--radius);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-sm);
+}
+
+.cancelBtn, .saveBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.cancelBtn {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.saveBtn {
+  background: var(--accent);
+  color: white;
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+}

@@ -1,0 +1,47 @@
+.page {
+  padding: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.addBtn {
+  padding: 8px 20px;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.addBtn:hover {
+  background: var(--color-primary-hover);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: var(--space-md);
+}

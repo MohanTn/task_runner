@@ -1,0 +1,88 @@
+.page {
+  padding: var(--space-xl);
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+}
+
+.sectionTitle {
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.scheduleGrid {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.scheduleField {
+  flex: 1;
+  min-width: 200px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.85em;
+  color: var(--text-2);
+  margin-bottom: var(--space-xs);
+  font-weight: 500;
+}
+
+.scheduleActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  padding-bottom: 2px;
+}
+
+.toggleBtn {
+  padding: 8px 20px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.toggleOn {
+  background: rgba(45, 157, 87, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.toggleOff {
+  background: rgba(216, 67, 78, 0.1);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.primaryBtn {
+  padding: 8px 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+}
+
+.poolInfo {
+  margin-top: var(--space-sm);
+  font-size: 0.85em;
+  color: var(--text-2);
+}

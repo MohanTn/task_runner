@@ -1,0 +1,73 @@
+.title {
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-transform: uppercase;
+  font-size: 0.75em;
+  color: var(--text-2);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--surface);
+}
+
+.timeCell {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.jobCell {
+  font-weight: 500;
+  font-size: 0.9em;
+}
+
+.exitCell {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-2);
+}
+
+.triggerCell {
+  font-size: 0.85em;
+  color: var(--text-2);
+  text-transform: capitalize;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.emptyCell {
+  text-align: center;
+  color: var(--text-2);
+  padding: var(--space-lg) !important;
+  font-size: 0.9em;
+}

@@ -1,0 +1,180 @@
+{
+  "version": "1.1",
+  "layers": [
+    {
+      "id": "application",
+      "label": "Application Layer",
+      "color": "rgba(219,39,119,0.08)",
+      "order": 0
+    },
+    {
+      "id": "interface",
+      "label": "Interface Layer",
+      "color": "rgba(234,179,8,0.08)",
+      "order": 1
+    },
+    {
+      "id": "usecase",
+      "label": "Use Case Layer",
+      "color": "rgba(59,130,246,0.08)",
+      "order": 2
+    },
+    {
+      "id": "domain",
+      "label": "Domain Layer",
+      "color": "rgba(34,197,94,0.08)",
+      "order": 3
+    },
+    {
+      "id": "entity",
+      "label": "Entity Layer",
+      "color": "rgba(16,185,129,0.08)",
+      "order": 4
+    },
+    {
+      "id": "data",
+      "label": "Data Layer",
+      "color": "rgba(245,158,11,0.08)",
+      "order": 5
+    },
+    {
+      "id": "infrastructure",
+      "label": "Infrastructure Layer",
+      "color": "rgba(239,68,68,0.08)",
+      "order": 6
+    }
+  ],
+  "connections": [
+    {
+      "from": "application",
+      "to": "interface"
+    },
+    {
+      "from": "application",
+      "to": "usecase"
+    },
+    {
+      "from": "application",
+      "to": "domain"
+    },
+    {
+      "from": "application",
+      "to": "entity"
+    },
+    {
+      "from": "application",
+      "to": "data"
+    },
+    {
+      "from": "application",
+      "to": "infrastructure"
+    },
+    {
+      "from": "interface",
+      "to": "usecase"
+    },
+    {
+      "from": "interface",
+      "to": "domain"
+    },
+    {
+      "from": "interface",
+      "to": "entity"
+    },
+    {
+      "from": "interface",
+      "to": "data"
+    },
+    {
+      "from": "interface",
+      "to": "infrastructure"
+    },
+    {
+      "from": "usecase",
+      "to": "domain"
+    },
+    {
+      "from": "usecase",
+      "to": "entity"
+    },
+    {
+      "from": "usecase",
+      "to": "data"
+    },
+    {
+      "from": "usecase",
+      "to": "infrastructure"
+    },
+    {
+      "from": "domain",
+      "to": "entity"
+    },
+    {
+      "from": "domain",
+      "to": "data"
+    },
+    {
+      "from": "domain",
+      "to": "infrastructure"
+    },
+    {
+      "from": "entity",
+      "to": "data"
+    },
+    {
+      "from": "entity",
+      "to": "infrastructure"
+    },
+    {
+      "from": "data",
+      "to": "infrastructure"
+    }
+  ],
+  "files": {
+    "vite.config.ts": "application",
+    "src/broadcast.ts": "usecase",
+    "src/client/api/base.ts": "interface",
+    "src/client/api/jobs.api.ts": "interface",
+    "src/client/api/settings.api.ts": "interface",
+    "src/client/components/Common/ConfirmDialog.tsx": "interface",
+    "src/client/components/Common/CronInput.tsx": "interface",
+    "src/client/components/Common/Navigation.tsx": "unknown",
+    "src/client/components/Common/Slider.tsx": "interface",
+    "src/client/components/Common/StatusBadge.tsx": "interface",
+    "src/client/components/Dashboard/Dashboard.tsx": "interface",
+    "src/client/components/ExecutionHistory/ExecutionHistory.tsx": "interface",
+    "src/client/components/ExecutionHistory/ExecutionOutput.tsx": "interface",
+    "src/client/components/Jobs/JobCard.tsx": "interface",
+    "src/client/components/Jobs/JobEditor.tsx": "interface",
+    "src/client/components/Jobs/JobList.tsx": "interface",
+    "src/client/components/Settings/SettingsPanel.tsx": "interface",
+    "src/client/hooks/useWebSocket.ts": "usecase",
+    "src/client/main.tsx": "application",
+    "src/client/state/AppState.tsx": "unknown",
+    "src/client/types/executions.ts": "usecase",
+    "src/client/types/index.ts": "application",
+    "src/client/types/jobs.ts": "usecase",
+    "src/client/types/settings.ts": "usecase",
+    "src/db/database.ts": "usecase",
+    "src/db/migrations.ts": "usecase",
+    "src/errors.ts": "usecase",
+    "src/index.ts": "application",
+    "src/queue/cron-scheduler.ts": "usecase",
+    "src/routes/control.routes.ts": "interface",
+    "src/routes/jobs.routes.ts": "unknown",
+    "src/routes/settings.routes.ts": "interface",
+    "src/server.ts": "usecase",
+    "src/types.ts": "usecase",
+    "src/websocket.ts": "usecase",
+    "src/client/api/cli-configs.api.ts": "unknown",
+    "src/client/components/Cockpit/ReposTable.tsx": "unknown",
+    "src/client/components/Cockpit/JobPromptEditor.tsx": "unknown",
+    "src/client/components/Cockpit/JobsTable.tsx": "unknown",
+    "src/client/components/Cockpit/QueueTable.tsx": "unknown",
+    "src/client/components/Cockpit/CliSettings.tsx": "unknown",
+    "src/client/components/Cockpit/Cockpit.tsx": "unknown",
+    "src/client/App.tsx": "unknown",
+    "src/routes/repos.routes.ts": "unknown"
+  },
+  "overrides": {}
+}

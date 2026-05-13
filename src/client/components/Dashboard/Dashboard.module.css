@@ -1,0 +1,209 @@
+.page {
+  padding: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.refreshBtn {
+  padding: 6px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.85em;
+}
+
+.refreshBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.statCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statValue {
+  font-size: 2em;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--color-primary);
+}
+
+.statLabel {
+  font-size: 0.85em;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.statSub {
+  font-size: 0.75em;
+  color: var(--color-text-muted);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.controlCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.controlHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.controlHeader h3 {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.controlDesc {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+.toggleBtn {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.toggleBtn.on {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+}
+
+.toggleBtn.off {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-danger);
+}
+
+.section {
+  margin-bottom: var(--space-lg);
+}
+
+.sectionTitle {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.empty {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+  padding: var(--space-lg);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface-hover);
+  font-size: 0.8em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  padding: var(--space-sm) var(--space-md);
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+}
+
+.tableRow:hover {
+  background: var(--color-surface-hover);
+}
+
+.jobName {
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.actionBtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.actionBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.quickGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.quickBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-align: left;
+  font-size: 0.85em;
+}
+
+.quickBtn:hover {
+  border-color: var(--color-primary);
+}

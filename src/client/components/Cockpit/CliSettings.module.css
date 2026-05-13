@@ -1,0 +1,99 @@
+.title {
+  font-size: 1em;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-transform: uppercase;
+  font-size: 0.75em;
+  color: var(--text-2);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--surface);
+}
+
+.cliName {
+  font-weight: 600;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.templateCell {
+  max-width: 500px;
+}
+
+.template {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.inp {
+  width: 100%;
+  padding: 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.saveBtn {
+  padding: 4px 10px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.8em;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+}
+
+.cancelBtn {
+  padding: 4px 10px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  border-radius: var(--radius);
+  font-size: 0.8em;
+}

@@ -1,0 +1,133 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.title {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.addBtn {
+  padding: 4px 12px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.addBtn:hover {
+  opacity: 0.9;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-transform: uppercase;
+  font-size: 0.75em;
+  color: var(--text-2);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: 6px var(--space-sm);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: var(--surface);
+}
+
+.nameCell {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.repoCell {
+  color: var(--text-2);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.cmdCell {
+  max-width: 300px;
+}
+
+.cmd {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeoutCell {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.linkBtn:hover {
+  text-decoration: underline;
+}
+
+.linkBtnDanger {
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+.linkBtnDanger:hover {
+  color: var(--danger);
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dotOn {
+  background: var(--success);
+}
+
+.dotOff {
+  background: var(--text-2);
+}
+
+.emptyCell {
+  text-align: center;
+  color: var(--text-2);
+  padding: var(--space-lg) !important;
+  font-size: 0.9em;
+}

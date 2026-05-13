@@ -1,0 +1,142 @@
+.page {
+  padding: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.pruneBtn {
+  padding: 6px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger);
+  font-size: 0.85em;
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.select {
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.85em;
+}
+
+.count {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+  margin-left: auto;
+}
+
+.loading {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-xl);
+}
+
+.empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.5fr 0.8fr 0.8fr 0.6fr 0.8fr;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-surface-hover);
+  font-size: 0.8em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.5fr 0.8fr 0.8fr 0.6fr 0.8fr;
+  padding: var(--space-sm) var(--space-md);
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.9em;
+}
+
+.tableRow:hover {
+  background: var(--color-surface-hover);
+}
+
+.jobName {
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--color-text-muted);
+  font-size: 0.9em;
+}
+
+.viewBtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+  font-size: 0.8em;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.pageBtn {
+  padding: 6px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.85em;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pageInfo {
+  font-size: 0.85em;
+  color: var(--color-text-muted);
+}
