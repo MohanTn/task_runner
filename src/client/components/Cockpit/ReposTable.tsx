@@ -31,9 +31,7 @@ export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProp
     setEditAiType(repo.ai_type as string);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-  };
+  const cancelEdit = () => setEditingId(null);
 
   const handleSave = async () => {
     if (!editName.trim() || !editPath.trim()) return;
@@ -64,12 +62,12 @@ export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProp
   };
 
   return (
-    <div>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Repos</h3>
-        <button className={styles.addBtn} onClick={startAdd}>+ Add</button>
+    <>
+      <div className="section-head">
+        <span className="section-title">Repos</span>
+        <button className="btn btn-sm btn-ghost" onClick={startAdd}>+ Add</button>
       </div>
-      <table className={styles.table}>
+      <table className="tbl">
         <thead>
           <tr>
             <th>Name</th>
@@ -82,64 +80,56 @@ export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProp
           {repos.map((repo) =>
             editingId === repo.id ? (
               <tr key={repo.id}>
+                <td><input className="f-input f-mono" value={editName} onChange={(e) => setEditName(e.target.value)} /></td>
+                <td><input className="f-input f-mono" value={editPath} onChange={(e) => setEditPath(e.target.value)} /></td>
                 <td>
-                  <input className={styles.inp} value={editName} onChange={(e) => setEditName(e.target.value)} />
-                </td>
-                <td>
-                  <input className={styles.inp} value={editPath} onChange={(e) => setEditPath(e.target.value)} />
-                </td>
-                <td>
-                  <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
-                    {cliConfigs.map((c) => (
-                      <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>
-                    ))}
+                  <select className="f-select" value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
+                    {cliConfigs.map((c) => <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>)}
                   </select>
                 </td>
                 <td className={styles.actions}>
-                  <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>Save</button>
-                  <button className={styles.cancelBtn} onClick={cancelEdit}>Cancel</button>
+                  <button className="btn btn-sm btn-primary" onClick={handleSave} disabled={saving}>Save</button>
+                  <button className="btn btn-sm btn-muted" onClick={cancelEdit}>Cancel</button>
                 </td>
               </tr>
             ) : (
               <tr key={repo.id}>
-                <td className={styles.cell}>{repo.name}</td>
-                <td className={styles.cellMono}>{repo.path}</td>
-                <td><span className={`${styles.badge} ${repo.ai_type === 'claude' ? styles.badgeClaude : repo.ai_type === 'copilot' ? styles.badgeCopilot : styles.badgeCustom}`}>{repo.ai_type}</span></td>
+                <td className={styles.nameCell}>{repo.name}</td>
+                <td className={styles.pathCell}>{repo.path}</td>
+                <td>
+                  <span className={`badge badge-${repo.ai_type === 'claude' ? 'claude' : repo.ai_type === 'copilot' ? 'copilot' : 'custom'}`}>
+                    {repo.ai_type}
+                  </span>
+                </td>
                 <td className={styles.actions}>
-                  <button className={styles.linkBtn} onClick={() => startEdit(repo)}>Edit</button>
-                  <button className={styles.linkBtnDanger} onClick={() => handleDelete(repo.id)}>Delete</button>
+                  <button className="btn btn-sm btn-link" onClick={() => startEdit(repo)}>Edit</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(repo.id)}>Delete</button>
                 </td>
               </tr>
             ),
           )}
           {editingId === '__new' && (
             <tr>
+              <td><input className="f-input f-mono" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="my-repo" autoFocus /></td>
+              <td><input className="f-input f-mono" value={editPath} onChange={(e) => setEditPath(e.target.value)} placeholder="/home/user/project" /></td>
               <td>
-                <input className={styles.inp} value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="my-repo" />
-              </td>
-              <td>
-                <input className={styles.inp} value={editPath} onChange={(e) => setEditPath(e.target.value)} placeholder="/home/user/project" />
-              </td>
-              <td>
-                <select className={styles.select} value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
-                  {cliConfigs.map((c) => (
-                    <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>
-                  ))}
+                <select className="f-select" value={editAiType} onChange={(e) => setEditAiType(e.target.value)}>
+                  {cliConfigs.map((c) => <option key={c.cli_name} value={c.cli_name}>{c.cli_name}</option>)}
                 </select>
               </td>
               <td className={styles.actions}>
-                <button className={styles.saveBtn} onClick={handleSave} disabled={saving}>Add</button>
-                <button className={styles.cancelBtn} onClick={cancelEdit}>Cancel</button>
+                <button className="btn btn-sm btn-primary" onClick={handleSave} disabled={saving}>Add</button>
+                <button className="btn btn-sm btn-muted" onClick={cancelEdit}>Cancel</button>
               </td>
             </tr>
           )}
           {repos.length === 0 && editingId !== '__new' && (
             <tr>
-              <td className={styles.emptyCell} colSpan={4}>No repos configured. Click "+ Add" to create one.</td>
+              <td className={styles.emptyCell} colSpan={4}>No repos yet — click &quot;+ Add&quot; to create one.</td>
             </tr>
           )}
         </tbody>
       </table>
-    </div>
+    </>
   );
 }

@@ -1,0 +1,191 @@
+/* ── Modal overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  padding: var(--sp-5);
+  max-width: 520px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.modalTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+
+.error {
+  font-size: 12px;
+  color: var(--danger);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--danger-2);
+  border-radius: var(--radius-sm);
+}
+
+.modalActions {
+  display: flex;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+}
+
+/* ── Header ── */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* ── Table cells ── */
+.nameCell { font-weight: 500; }
+
+.expr {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.jobsCell {
+  max-width: 320px;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.dotOn  { background: var(--success); }
+.dotOff { background: var(--text-3); }
+
+.expandActive { color: var(--accent); }
+
+.emptyCell {
+  text-align: center;
+  color: var(--text-2);
+  padding: var(--sp-5) var(--sp-4) !important;
+  font-size: 12px;
+  border-bottom: none !important;
+}
+
+.mappingPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.mappingPanelCompact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.mappingLabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  align-items: center;
+  min-height: 28px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  background: var(--accent-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.chipRemove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.7;
+}
+.chipRemove:hover { opacity: 1; }
+
+.noJobs {
+  font-size: 12px;
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.addJobRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* Compact inline add — sits inside the chips row */
+.addInline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.addSelect {
+  height: 24px;
+  padding: 0 6px;
+  background: var(--bg);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+  max-width: 130px;
+}
+.addSelect:focus { outline: none; border-color: var(--accent); }

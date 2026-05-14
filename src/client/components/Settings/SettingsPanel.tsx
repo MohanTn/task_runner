@@ -1,27 +1,9 @@
-import { useCallback, useState } from 'react';
 import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
-import type { Settings } from '../../types/settings.js';
 import styles from './SettingsPanel.module.css';
 
 export function SettingsPanel() {
   const { settings, refreshSettings } = useAppState();
-  const [saving, setSaving] = useState<string | null>(null);
-
-  const update = useCallback(
-    async (partial: Partial<Settings>) => {
-      setSaving(Object.keys(partial)[0]);
-      try {
-        await settingsApi.update(partial);
-        await refreshSettings();
-      } catch {
-        // ignore
-      } finally {
-        setSaving(null);
-      }
-    },
-    [refreshSettings],
-  );
 
   const handleCronToggle = async () => {
     if (settings?.cron_enabled) {
@@ -48,19 +30,9 @@ export function SettingsPanel() {
               {settings?.cron_enabled ? 'Stop' : 'Start'}
             </button>
           </div>
-          <div className={styles.field} style={{ marginTop: 'var(--space-sm)' }}>
-            <label className={styles.label}>Cron Expression</label>
-            <input
-              className={styles.input}
-              type="text"
-              value={settings?.cron_expression ?? '*/5 * * * *'}
-              onChange={(e) => update({ cron_expression: e.target.value })}
-              placeholder="*/5 * * * *"
-            />
-            <p className={styles.hint}>
-              On each tick, all enabled jobs open in a new Windows Terminal tab.
-            </p>
-          </div>
+          <p className={styles.hint}>
+            Each job fires on its own schedule — configure it in the job editor.
+          </p>
         </div>
       </div>
     </div>

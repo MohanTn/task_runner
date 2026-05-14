@@ -1,61 +1,60 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--sp-2);
 }
 
 .inputRow {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--sp-2);
 }
 
 .input {
   flex: 1;
-  padding: 8px 12px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  color: var(--color-text);
+  height: var(--input-h);
+  padding: 0 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
   font-family: var(--font-mono);
-  font-size: 1em;
+  font-size: 13px;
+  transition: border-color 0.12s;
 }
-
-.input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
+.input:focus { outline: none; border-color: var(--accent); }
 
 .description {
-  color: var(--color-text-muted);
-  font-size: 0.85em;
+  font-size: 12px;
+  color: var(--text-2);
   white-space: nowrap;
-  min-width: 180px;
+  min-width: 160px;
 }
 
 .presets {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--sp-1);
 }
 
 .preset {
-  padding: 4px 10px;
-  font-size: 0.8em;
-  border: 1px solid var(--color-border);
+  height: var(--btn-sm-h);
+  padding: 0 9px;
+  font-size: 12px;
   border-radius: var(--radius-sm);
-  color: var(--color-text-muted);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   background: transparent;
-  transition: all 0.15s;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
-
-.preset:hover {
-  border-color: var(--color-primary);
-  color: var(--color-text);
-}
+.preset:hover:not(:disabled) { border-color: var(--border-2); color: var(--text); background: var(--surface-2); }
+.preset:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .preset.active {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: white;
+  border-color: var(--accent);
+  background: var(--accent-2);
+  color: var(--accent);
+  font-weight: 500;
 }

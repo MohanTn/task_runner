@@ -1,10 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
 import { executionApi } from '../../api/executions.api.js';
 import { jobApi } from '../../api/jobs.api.js';
 import type { JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
-import { CronInput } from '../Common/CronInput.js';
 import { ReposTable } from './ReposTable.js';
 import { JobsTable } from './JobsTable.js';
 import { CliSettings } from './CliSettings.js';
@@ -19,15 +18,7 @@ export function Cockpit() {
     refreshAll,
   } = useAppState();
 
-  const [savingSchedule, setSavingSchedule] = useState(false);
   const cronOn = settings?.cron_enabled === true;
-  const [cronExpr, setCronExpr] = useState('*/5 * * * *');
-
-  useEffect(() => {
-    if (settings) {
-      setCronExpr(settings.cron_expression ?? '*/5 * * * *');
-    }
-  }, [settings]);
 
   const handleCronToggle = useCallback(async () => {
     if (cronOn) {
@@ -37,18 +28,6 @@ export function Cockpit() {
     }
     await refreshAll();
   }, [cronOn, refreshAll]);
-
-  const handleScheduleSave = useCallback(async () => {
-    setSavingSchedule(true);
-    try {
-      await settingsApi.update({ cron_expression: cronExpr });
-      await refreshAll();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save schedule');
-    } finally {
-      setSavingSchedule(false);
-    }
-  }, [cronExpr, refreshAll]);
 
   const handleRun = useCallback(async (jobId: number) => {
     try {
@@ -98,22 +77,13 @@ export function Cockpit() {
       {/* Schedule Settings */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Schedule Settings</h2>
-        <div className={styles.scheduleGrid}>
-          <div className={styles.scheduleField}>
-            <label className={styles.fieldLabel}>Cron Expression</label>
-            <CronInput value={cronExpr} onChange={setCronExpr} />
-          </div>
-          <div className={styles.scheduleActions}>
-            <button
-              className={`${styles.toggleBtn} ${cronOn ? styles.toggleOn : styles.toggleOff}`}
-              onClick={handleCronToggle}
-            >
-              {cronOn ? 'Stop' : 'Start'}
-            </button>
-            <button className={styles.primaryBtn} onClick={handleScheduleSave} disabled={savingSchedule}>
-              {savingSchedule ? 'Saving...' : 'Save'}
-            </button>
-          </div>
+        <div className={styles.scheduleActions}>
+          <button
+            className={`${styles.toggleBtn} ${cronOn ? styles.toggleOn : styles.toggleOff}`}
+            onClick={handleCronToggle}
+          >
+            {cronOn ? 'Stop Scheduler' : 'Start Scheduler'}
+          </button>
         </div>
       </section>
 

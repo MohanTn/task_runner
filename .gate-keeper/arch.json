@@ -185,7 +185,14 @@
     "src/queue/worker-pool.ts": "usecase",
     "src/routes/cli-configs.routes.ts": "unknown",
     "src/routes/executions.routes.ts": "unknown",
-    "src/queue/wt-launcher.ts": "unknown"
+    "src/queue/wt-launcher.ts": "unknown",
+    "src/routes/crons.routes.ts": "unknown",
+    "src/client/types/crons.ts": "unknown",
+    "src/client/api/crons.api.ts": "unknown",
+    "src/client/components/Cockpit/CronsManager.tsx": "unknown",
+    "src/client/components/Cockpit/CronEditorModal.tsx": "unknown",
+    "src/client/components/Cockpit/CronJobMapping.tsx": "unknown",
+    "src/client/components/Cockpit/CronRow.tsx": "unknown"
   },
   "overrides": {}
 }

@@ -3,7 +3,10 @@ import styles from './Navigation.module.css';
 export function Navigation() {
   return (
     <header className={styles.header}>
-      <span className={styles.brand}>Task Runner</span>
+      <div className={styles.brand}>
+        <span className={styles.brandDot} />
+        Task Runner
+      </div>
     </header>
   );
 }

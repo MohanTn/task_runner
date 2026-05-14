@@ -6,38 +6,30 @@ import { NotFoundError, ValidationError, ConflictError } from '../errors.js';
 interface StoredJob extends Job {
   repo_id: number | null;
   prompt: string;
-  run_mode: 'single' | 'multiple';
 }
 
+const JOB_WITH_REPO_SQL = `
+  SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
+  FROM jobs j
+  LEFT JOIN repos r ON r.id = j.repo_id
+`;
+
 function getJobWithRepo(db: Database.Database, id: number): object | undefined {
-  return db
-    .prepare(
-      `SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
-       FROM jobs j
-       LEFT JOIN repos r ON r.id = j.repo_id
-       WHERE j.id = ?`,
-    )
-    .get(id) as object | undefined;
+  return db.prepare(`${JOB_WITH_REPO_SQL} WHERE j.id = ?`).get(id) as object | undefined;
 }
 
 function getAllJobsWithRepo(db: Database.Database): object[] {
-  return db
-    .prepare(
-      `SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
-       FROM jobs j
-       LEFT JOIN repos r ON r.id = j.repo_id
-       ORDER BY j.name`,
-    )
-    .all() as object[];
+  return db.prepare(`${JOB_WITH_REPO_SQL} ORDER BY j.name`).all() as object[];
 }
 
-function buildCommand(db: Database.Database, repoId: number | null, prompt: string): string | null {
-  if (!repoId || !prompt?.trim()) return null;
-  const repo = db.prepare('SELECT ai_type FROM repos WHERE id = ?').get(repoId) as { ai_type: string } | undefined;
-  if (!repo) return null;
-  const config = db.prepare('SELECT command_template FROM cli_configs WHERE cli_name = ?').get(repo.ai_type) as
-    | { command_template: string }
+function buildCommand(db: Database.Database, repoId: number, prompt: string): string | null {
+  const repo = db.prepare('SELECT ai_type FROM repos WHERE id = ?').get(repoId) as
+    | { ai_type: string }
     | undefined;
+  if (!repo) return null;
+  const config = db
+    .prepare('SELECT command_template FROM cli_configs WHERE cli_name = ?')
+    .get(repo.ai_type) as { command_template: string } | undefined;
   if (!config) return null;
   return `${config.command_template} "${prompt.trim()}"`;
 }
@@ -56,22 +48,26 @@ export function createJobsRouter(db: Database.Database): Router {
   });
 
   router.post('/', (req, res) => {
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } = req.body;
-
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } =
+      req.body;
     if (!name?.trim()) throw new ValidationError('name is required');
 
-    const finalRunMode = run_mode === 'single' ? 'single' : 'multiple';
+    const existing = db.prepare('SELECT id FROM jobs WHERE name = ?').get(name.trim());
+    if (existing) throw new ConflictError(`Job "${name}" already exists`);
 
+    const finalRunMode = run_mode === 'single' ? 'single' : 'multiple';
     let finalCommand: string;
     let finalRepoPath: string;
     let finalRepoId: number | null = repo_id ?? null;
     let finalPrompt = prompt ?? '';
 
     if (repo_id && prompt?.trim()) {
-      const constructed = buildCommand(db, repo_id, prompt);
-      if (!constructed) throw new ValidationError('Could not construct command from repo and prompt');
-      finalCommand = constructed;
-      const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(repo_id) as { path: string } | undefined;
+      const cmd = buildCommand(db, repo_id, prompt);
+      if (!cmd) throw new ValidationError('Could not construct command from repo and prompt');
+      finalCommand = cmd;
+      const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(repo_id) as
+        | { path: string }
+        | undefined;
       if (!repo) throw new ValidationError('Repo not found');
       finalRepoPath = repo.path;
     } else if (repo_path?.trim() && command?.trim()) {
@@ -82,9 +78,6 @@ export function createJobsRouter(db: Database.Database): Router {
     } else {
       throw new ValidationError('Provide either (repo_id + prompt) or (repo_path + command)');
     }
-
-    const existing = db.prepare('SELECT id FROM jobs WHERE name = ?').get(name.trim());
-    if (existing) throw new ConflictError(`Job "${name}" already exists`);
 
     const result = db
       .prepare(
@@ -111,59 +104,64 @@ export function createJobsRouter(db: Database.Database): Router {
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } = req.body;
-
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } =
+      req.body;
     if (name !== undefined && !name.trim()) throw new ValidationError('name cannot be empty');
 
     if (name && name.trim() !== job.name) {
-      const existing = db
+      const dup = db
         .prepare('SELECT id FROM jobs WHERE name = ? AND id != ?')
         .get(name.trim(), job.id);
-      if (existing) throw new ConflictError(`Job "${name}" already exists`);
+      if (dup) throw new ConflictError(`Job "${name}" already exists`);
     }
 
-    const updatedName = name?.trim() ?? job.name;
     const updatedRepoId = repo_id !== undefined ? repo_id : job.repo_id;
     const updatedPrompt = prompt !== undefined ? prompt : job.prompt;
-    const updatedTimeout = timeout_seconds ?? job.timeout_seconds;
-    const updatedRunMode = run_mode === 'single' ? 'single' : run_mode === 'multiple' ? 'multiple' : job.run_mode;
+    const updatedRunMode =
+      run_mode === 'single' ? 'single' : run_mode === 'multiple' ? 'multiple' : job.run_mode;
 
     let updatedCommand: string;
-    if (command !== undefined && command?.trim()) {
+    if (command?.trim()) {
       updatedCommand = command.trim();
     } else if (updatedRepoId && updatedPrompt?.trim()) {
-      const constructed = buildCommand(db, updatedRepoId, updatedPrompt);
-      updatedCommand = constructed ?? job.command;
+      updatedCommand = buildCommand(db, updatedRepoId, updatedPrompt) ?? job.command;
     } else {
       updatedCommand = job.command;
     }
 
     let updatedRepoPath: string;
     if (updatedRepoId) {
-      const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(updatedRepoId) as { path: string } | undefined;
+      const repo = db.prepare('SELECT path FROM repos WHERE id = ?').get(updatedRepoId) as
+        | { path: string }
+        | undefined;
       updatedRepoPath = repo?.path ?? job.repo_path;
     } else {
       updatedRepoPath = repo_path?.trim() ?? job.repo_path;
     }
 
-    const updatedEnabled = enabled !== undefined ? (enabled ? 1 : 0) : (job.enabled ? 1 : 0);
-
     db.prepare(
       `UPDATE jobs SET name = ?, repo_path = ?, command = ?, repo_id = ?, prompt = ?,
        enabled = ?, timeout_seconds = ?, run_mode = ?, updated_at = datetime('now')
        WHERE id = ?`,
-    ).run(updatedName, updatedRepoPath, updatedCommand, updatedRepoId, updatedPrompt, updatedEnabled, updatedTimeout, updatedRunMode, job.id);
+    ).run(
+      name?.trim() ?? job.name,
+      updatedRepoPath,
+      updatedCommand,
+      updatedRepoId,
+      updatedPrompt,
+      enabled !== undefined ? (enabled ? 1 : 0) : (job.enabled ? 1 : 0),
+      timeout_seconds ?? job.timeout_seconds,
+      updatedRunMode,
+      job.id,
+    );
 
     res.json(getJobWithRepo(db, job.id)!);
   });
 
   router.delete('/:id', (req, res) => {
-    const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(Number(req.params.id)) as
-      | StoredJob
-      | undefined;
+    const job = db.prepare('SELECT id FROM jobs WHERE id = ?').get(Number(req.params.id));
     if (!job) throw new NotFoundError('Job not found');
-
-    db.prepare('DELETE FROM jobs WHERE id = ?').run(job.id);
+    db.prepare('DELETE FROM jobs WHERE id = ?').run(Number(req.params.id));
     res.json({ success: true });
   });
 
@@ -172,10 +170,10 @@ export function createJobsRouter(db: Database.Database): Router {
       | StoredJob
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
-
-    const newEnabled = job.enabled ? 0 : 1;
-    db.prepare('UPDATE jobs SET enabled = ?, updated_at = datetime(\'now\') WHERE id = ?').run(newEnabled, job.id);
-
+    db.prepare("UPDATE jobs SET enabled = ?, updated_at = datetime('now') WHERE id = ?").run(
+      job.enabled ? 0 : 1,
+      job.id,
+    );
     res.json(getJobWithRepo(db, job.id)!);
   });
 

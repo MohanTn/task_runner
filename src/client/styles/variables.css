@@ -1,60 +1,74 @@
 :root {
-  --bg: #090b11;
-  --surface: #11131a;
-  --surface-2: #181b25;
-  --border: #1f2230;
-  --text: #ced2db;
-  --text-2: #8b90a5;
-  --accent: #4b7bec;
-  --accent-hover: #5f8cf5;
-  --success: #2d9d57;
-  --warning: #c9901a;
-  --danger: #d8434e;
-  --info: #4b7bec;
+  /* ── Palette ── */
+  --bg:        #09090f;
+  --surface:   #111318;
+  --surface-2: #17191f;
+  --surface-3: #1d2030;
+  --border:    #1e2231;
+  --border-2:  #252938;
+  --text:      #cdd1dc;
+  --text-2:    #7c8196;
+  --text-3:    #4a4f63;
+  --accent:    #4f7ef0;
+  --accent-2:  rgba(79, 126, 240, 0.12);
+  --accent-hover: #6390f5;
+  --success:   #2ea55f;
+  --success-2: rgba(46, 165, 95, 0.12);
+  --warning:   #c99a1a;
+  --danger:    #d4404b;
+  --danger-2:  rgba(212, 64, 75, 0.1);
+  --info:      #4f7ef0;
 
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
-  --font-mono: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', monospace;
+  /* ── Typography ── */
+  --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
 
-  /* Spacing (base-2 system) */
+  /* ── Component sizes ── */
+  --radius:          6px;
+  --radius-sm:       4px;
+  --header-h:        48px;
+  --section-head-h:  38px;
+  --btn-h:           28px;
+  --btn-sm-h:        24px;
+  --input-h:         32px;
+
+  /* ── 4-point spacing grid ── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+
+  /* ── Legacy spacing aliases (kept for backward compat) ── */
   --space-1: 2px;
   --space-2: 4px;
   --space-3: 8px;
   --space-4: 12px;
   --space-5: 16px;
   --space-6: 24px;
-
-  /* Named spacing aliases */
   --space-xs: var(--space-1);
   --space-sm: var(--space-2);
   --space-md: var(--space-3);
   --space-lg: var(--space-4);
   --space-xl: var(--space-5);
 
-  /* Radius */
-  --radius: 4px;
-
-  /* Layout */
-  --header-h: 40px;
-  --control-h: 44px;
-
-  /* ---- color-* aliases (for components that used the other convention) ---- */
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-surface-hover: var(--surface-2);
-  --color-border: var(--border);
-  --color-text: var(--text);
-  --color-text-muted: var(--text-2);
-  --color-primary: var(--accent);
-  --color-primary-hover: var(--accent-hover);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --color-info: var(--info);
-
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-
-  --shadow-md: none;
+  /* ── Legacy color aliases ── */
+  --color-bg:           var(--bg);
+  --color-surface:      var(--surface);
+  --color-surface-2:    var(--surface-2);
+  --color-surface-hover:var(--surface-3);
+  --color-border:       var(--border);
+  --color-text:         var(--text);
+  --color-text-muted:   var(--text-2);
+  --color-primary:      var(--accent);
+  --color-primary-hover:var(--accent-hover);
+  --color-success:      var(--success);
+  --color-warning:      var(--warning);
+  --color-danger:       var(--danger);
+  --color-info:         var(--info);
+  --radius-md:          var(--radius);
+  --radius-lg:          var(--radius);
+  --shadow-md:          none;
+  --control-h:          44px;
 }

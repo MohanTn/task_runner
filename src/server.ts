@@ -10,6 +10,7 @@ import { createSettingsRouter } from './routes/settings.routes.js';
 import { createControlRouter } from './routes/control.routes.js';
 import { createReposRouter } from './routes/repos.routes.js';
 import { createCliConfigsRouter } from './routes/cli-configs.routes.js';
+import { createCronsRouter } from './routes/crons.routes.js';
 import { NotFoundError, ValidationError, ConflictError, AppError } from './errors.js';
 import { isWtAvailable } from './queue/wt-launcher.js';
 
@@ -34,6 +35,7 @@ export function buildServer(): ServerInstance {
   const cronScheduler = new CronScheduler(db);
 
   app.use('/api/jobs', createJobsRouter(db));
+  app.use('/api/crons', createCronsRouter(db, cronScheduler));
   app.use('/api/executions', createExecutionsRouter(db));
   app.use('/api/settings', createSettingsRouter(db, cronScheduler));
   app.use('/api/control', createControlRouter(db, cronScheduler));
@@ -55,9 +57,6 @@ export function buildServer(): ServerInstance {
   for (const row of settings) {
     if (row.key === 'cron_enabled' && JSON.parse(row.value) === true) {
       cronScheduler.start();
-    }
-    if (row.key === 'cron_expression') {
-      cronScheduler.setExpression(JSON.parse(row.value));
     }
   }
 

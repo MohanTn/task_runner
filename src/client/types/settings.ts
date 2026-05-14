@@ -1,6 +1,5 @@
 export interface Settings {
   cron_enabled: boolean;
-  cron_expression: string;
   [key: string]: unknown;
 }
 

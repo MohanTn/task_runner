@@ -47,10 +47,6 @@ export function createSettingsRouter(
       }
     }
 
-    if (body.cron_expression !== undefined) {
-      cronScheduler.setExpression(body.cron_expression);
-    }
-
     res.json(parseSettings(db));
   });
 

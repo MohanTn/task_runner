@@ -1,160 +1,27 @@
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-sm);
-}
+/* Column-specific styles only */
 
-.title {
-  font-size: 1em;
-  font-weight: 600;
-}
-
-.addBtn {
-  padding: 4px 12px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: var(--radius);
-  font-size: 0.85em;
+.nameCell {
   font-weight: 500;
+  white-space: nowrap;
 }
 
-.addBtn:hover {
-  opacity: 0.9;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th {
-  text-transform: uppercase;
-  font-size: 0.75em;
-  color: var(--text-2);
-  font-weight: 600;
-  text-align: left;
-  padding: 6px var(--space-sm);
-  border-bottom: 1px solid var(--border);
-}
-
-.table td {
-  padding: 6px var(--space-sm);
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-.table tbody tr:hover {
-  background: var(--surface);
-}
-
-.cell {
-  font-weight: 500;
-}
-
-.cellMono {
+.pathCell {
   font-family: var(--font-mono);
-  font-size: 0.85em;
+  font-size: 12px;
   color: var(--text-2);
-}
-
-.inp {
-  width: 100%;
-  padding: 4px 8px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 0.85em;
-}
-
-.select {
-  padding: 4px 8px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 0.85em;
 }
 
 .actions {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 2px;
   white-space: nowrap;
-}
-
-.linkBtn {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 0.85em;
-  cursor: pointer;
-}
-
-.linkBtn:hover {
-  text-decoration: underline;
-}
-
-.linkBtnDanger {
-  background: none;
-  border: none;
-  color: var(--text-2);
-  font-size: 0.85em;
-  cursor: pointer;
-}
-
-.linkBtnDanger:hover {
-  color: var(--danger);
-}
-
-.saveBtn {
-  padding: 4px 10px;
-  background: var(--accent);
-  color: #fff;
-  border-radius: var(--radius);
-  font-size: 0.8em;
-}
-
-.saveBtn:disabled {
-  opacity: 0.5;
-}
-
-.cancelBtn {
-  padding: 4px 10px;
-  background: var(--surface-2);
-  color: var(--text-2);
-  border-radius: var(--radius);
-  font-size: 0.8em;
 }
 
 .emptyCell {
   text-align: center;
   color: var(--text-2);
-  padding: var(--space-lg) !important;
-  font-size: 0.9em;
-}
-
-.badge {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.75em;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.badgeClaude {
-  background: rgba(75, 123, 236, 0.15);
-  color: var(--accent);
-}
-
-.badgeCopilot {
-  background: rgba(45, 157, 87, 0.15);
-  color: var(--success);
-}
-
-.badgeCustom {
-  background: rgba(168, 85, 247, 0.15);
-  color: #a855f7;
+  padding: var(--sp-5) var(--sp-4) !important;
+  font-size: 12px;
+  border-bottom: none !important;
 }

@@ -1,14 +1,14 @@
-import { useState } from 'react';
 import type { Job, RunMode } from '../../types/jobs.js';
 import type { Repo } from '../../types/repos.js';
 import type { CliConfig } from '../../types/cli-configs.js';
-import { JobPromptEditor } from './JobPromptEditor.js';
+import type { Cron } from '../../types/crons.js';
 import styles from './JobsTable.module.css';
 
 interface JobsTableProps {
   jobs: Job[];
   repos: Repo[];
   cliConfigs: CliConfig[];
+  crons?: Cron[];
   onRun: (jobId: number) => void;
   onToggle: (jobId: number) => void;
   onDelete: (jobId: number) => void;
@@ -23,29 +23,25 @@ interface JobsTableProps {
   onJobsChanged: () => void;
 }
 
-export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, onEdit, onSave, onJobsChanged }: JobsTableProps) {
-  const [editing, setEditing] = useState<{ job?: Job } | null>(null);
-
+export function JobsTable({ jobs, crons = [], onRun, onToggle, onDelete, onEdit = () => {} }: JobsTableProps) {
   return (
-    <div>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Jobs</h3>
-        <button className={styles.addBtn} onClick={() => setEditing({})}>+ Add</button>
-      </div>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Run Mode</th>
-            <th>Repo</th>
-            <th>Command</th>
-            <th>Timeout</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {jobs.map((job) => (
+    <table className="tbl">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Mode</th>
+          <th>Repo</th>
+          <th>Command</th>
+          <th>Timeout</th>
+          <th>Cron</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {jobs.map((job) => {
+          const linkedCrons = crons.filter((c) => c.job_ids.includes(job.id));
+          return (
             <tr key={job.id}>
               <td className={styles.nameCell}>{job.name}</td>
               <td>
@@ -55,45 +51,44 @@ export function JobsTable({ jobs, repos, cliConfigs, onRun, onToggle, onDelete, 
                 />
               </td>
               <td>
-                <span className={`${styles.scheduleBadge} ${job.run_mode === 'single' ? styles.scheduleCron : styles.scheduleManual}`}>
-                  {job.run_mode === 'single' ? '1 Single' : '∞ Multiple'}
+                <span className={`badge ${job.run_mode === 'single' ? 'badge-single' : 'badge-multiple'}`}>
+                  {job.run_mode === 'single' ? '1× single' : '∞ repeat'}
                 </span>
               </td>
-              <td className={styles.repoCell}>{job.repo_name ?? '-'}</td>
+              <td className={styles.repoCell}>{job.repo_name ?? '—'}</td>
               <td className={styles.cmdCell}>
                 <code className={styles.cmd}>{job.command}</code>
               </td>
               <td className={styles.timeoutCell}>{job.timeout_seconds}s</td>
+              <td className={styles.cronCell}>
+                {linkedCrons.length === 0
+                  ? <span className={styles.cronNone}>—</span>
+                  : linkedCrons.map((c) => (
+                    <span key={c.id} className={`${styles.cronBadge} ${c.enabled ? styles.cronBadgeOn : styles.cronBadgeOff}`} title={c.expression}>
+                      {c.name}
+                    </span>
+                  ))
+                }
+              </td>
               <td className={styles.actions}>
-                <button className={styles.linkBtn} onClick={() => onRun(job.id)}>Run</button>
-                <button className={styles.linkBtn} onClick={() => onToggle(job.id)}>
+                <button className="btn btn-sm btn-link" onClick={() => onRun(job.id)}>Run</button>
+                <button className="btn btn-sm btn-link" onClick={() => onToggle(job.id)}>
                   {job.enabled ? 'Disable' : 'Enable'}
                 </button>
-                <button className={styles.linkBtn} onClick={() => { if (onEdit) onEdit(job); else setEditing({ job }); }}>Edit</button>
-                <button className={styles.linkBtnDanger} onClick={() => onDelete(job.id)}>Delete</button>
+                <button className="btn btn-sm btn-link" onClick={() => onEdit(job)}>Edit</button>
+                <button className="btn btn-sm btn-danger" onClick={() => onDelete(job.id)}>Delete</button>
               </td>
             </tr>
-          ))}
-          {jobs.length === 0 && (
-            <tr>
-              <td className={styles.emptyCell} colSpan={7}>No jobs configured. Click &quot;+ Add&quot; to create one.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {editing && (
-        <JobPromptEditor
-          job={editing.job}
-          repos={repos}
-          cliConfigs={cliConfigs}
-          onSave={async (data) => {
-            await onSave(data, editing.job?.id);
-            setEditing(null);
-          }}
-          onCancel={() => setEditing(null)}
-        />
-      )}
-    </div>
+          );
+        })}
+        {jobs.length === 0 && (
+          <tr>
+            <td className={styles.emptyCell} colSpan={8}>
+              No jobs yet — click &quot;+ Add&quot; to create one.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   );
 }
