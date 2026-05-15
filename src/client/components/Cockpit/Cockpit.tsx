@@ -3,11 +3,13 @@ import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
 import { executionApi } from '../../api/executions.api.js';
 import { jobApi } from '../../api/jobs.api.js';
-import type { JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
+import type { JobCreateInput, JobUpdateInput, RunMode, Job } from '../../types/jobs.js';
 import { ReposTable } from './ReposTable.js';
 import { JobsTable } from './JobsTable.js';
 import { CliSettings } from './CliSettings.js';
 import styles from './Cockpit.module.css';
+
+function noop(_job: Job) { /* no-op for legacy Cockpit */ }
 
 export function Cockpit() {
   const {
@@ -15,7 +17,9 @@ export function Cockpit() {
     settings,
     repos,
     cliConfigs,
+    crons,
     refreshAll,
+    refreshCrons,
   } = useAppState();
 
   const cronOn = settings?.cron_enabled === true;
@@ -96,13 +100,14 @@ export function Cockpit() {
       <section className={styles.section}>
         <JobsTable
           jobs={jobs}
-          repos={repos}
-          cliConfigs={cliConfigs}
+          crons={crons}
+          runningMap={{}}
+          filterScheduleId="all"
           onRun={handleRun}
           onToggle={handleToggle}
           onDelete={handleDelete}
-          onSave={handleJobSave}
-          onJobsChanged={refreshAll}
+          onEdit={noop}
+          onChanged={refreshCrons}
         />
       </section>
 

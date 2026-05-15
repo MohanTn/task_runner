@@ -189,3 +189,11 @@
   max-width: 130px;
 }
 .addSelect:focus { outline: none; border-color: var(--accent); }
+
+/* ── Next-run preview in cron editor ── */
+.nextRun {
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  margin-top: var(--sp-1);
+}

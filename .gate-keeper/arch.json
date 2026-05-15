@@ -158,7 +158,7 @@
     "src/db/database.ts": "usecase",
     "src/db/migrations.ts": "unknown",
     "src/errors.ts": "usecase",
-    "src/index.ts": "application",
+    "src/index.ts": "unknown",
     "src/queue/cron-scheduler.ts": "unknown",
     "src/routes/control.routes.ts": "unknown",
     "src/routes/jobs.routes.ts": "unknown",
@@ -192,7 +192,9 @@
     "src/client/components/Cockpit/CronsManager.tsx": "unknown",
     "src/client/components/Cockpit/CronEditorModal.tsx": "unknown",
     "src/client/components/Cockpit/CronJobMapping.tsx": "unknown",
-    "src/client/components/Cockpit/CronRow.tsx": "unknown"
+    "src/client/components/Cockpit/CronRow.tsx": "unknown",
+    "src/client/hooks/useCronRunner.ts": "unknown",
+    "src/client/components/Cockpit/JobScheduleDropdown.tsx": "unknown"
   },
   "overrides": {}
 }

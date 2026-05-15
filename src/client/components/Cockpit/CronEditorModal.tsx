@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import type { Cron } from '../../types/crons.js';
 import { CronInput } from '../Common/CronInput.js';
+import { getNextRunLabel } from '../../hooks/useCronRunner.js';
 import styles from './CronsManager.module.css';
 
 interface EditorState { name: string; expression: string; saving: boolean; error: string | null; }
@@ -46,6 +47,11 @@ export function CronEditorModal({ cron, onSave, onCancel }: {
         <div className={styles.field}>
           <label className={styles.label}>Schedule</label>
           <CronInput value={form.expression} onChange={onExprChange} />
+          {form.expression.trim() && (
+            <p className={styles.nextRun}>
+              Next run: {getNextRunLabel(form.expression)}
+            </p>
+          )}
         </div>
         {form.error && <p className={styles.error}>{form.error}</p>}
         <div className={styles.modalActions}>

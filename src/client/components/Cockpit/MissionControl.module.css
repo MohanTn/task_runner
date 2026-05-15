@@ -48,6 +48,19 @@
   margin: 0 2px;
 }
 
+/* ── Schedule filter in Jobs section header ── */
+.filterSelect {
+  height: var(--btn-sm-h);
+  padding: 0 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+.filterSelect:focus { outline: none; border-color: var(--accent); }
+
 /* ── Empty state ── */
 .emptyRow {
   padding: var(--sp-5) var(--sp-4);

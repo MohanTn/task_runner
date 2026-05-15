@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 
-const SCHEMA_VERSION = 11;
+const SCHEMA_VERSION = 12;
 
 const JOBS_TABLE_V11 = `
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,7 +222,39 @@ const STEP_MAP: Record<number, (db: Database.Database) => void> = {
   8: migrateV8,
   9: migrateV9,
   10: migrateV10,
+  11: migrateV11,
 };
+
+/**
+ * V12 — Strip embedded prompts from existing job.command values.
+ *
+ * Previously buildCommand wrapped prompts in double quotes and appended them
+ * to the template. Now the prompt is passed via temp file at execution time,
+ * so job.command should store only the CLI template.
+ */
+function migrateV11(db: Database.Database): void {
+  const rows = db
+    .prepare(
+      `SELECT j.id, r.ai_type
+       FROM jobs j
+       INNER JOIN repos r ON r.id = j.repo_id
+       WHERE j.repo_id IS NOT NULL`,
+    )
+    .all() as { id: number; ai_type: string }[];
+
+  const update = db.prepare(
+    `UPDATE jobs SET command = ?, updated_at = datetime('now') WHERE id = ?`,
+  );
+
+  for (const row of rows) {
+    const config = db
+      .prepare('SELECT command_template FROM cli_configs WHERE cli_name = ?')
+      .get(row.ai_type) as { command_template: string } | undefined;
+    if (config) {
+      update.run(config.command_template, row.id);
+    }
+  }
+}
 
 export function runMigrations(db: Database.Database): void {
   const currentVersion = db.pragma('user_version', { simple: true }) as number;

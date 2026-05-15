@@ -91,3 +91,49 @@
   border-color: var(--border-2);
   color: var(--text-3);
 }
+
+/* ── Schedule column ── */
+.scheduleCell {
+  min-width: 120px;
+}
+
+.scheduleSelect {
+  height: 26px;
+  padding: 0 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  max-width: 150px;
+  width: 100%;
+}
+.scheduleSelect:focus { outline: none; border-color: var(--accent); }
+.scheduleSelect:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Running state ── */
+.rowRunning td { background: rgba(34, 197, 94, 0.05) !important; }
+
+.runPulse {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: runPulseAnim 1s ease-in-out infinite;
+}
+
+@keyframes runPulseAnim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.8); }
+}
+
+.lastRun {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}

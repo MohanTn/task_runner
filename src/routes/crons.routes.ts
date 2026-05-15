@@ -5,11 +5,12 @@ import type { CronScheduler } from '../queue/cron-scheduler.js';
 import { NotFoundError, ValidationError, ConflictError } from '../errors.js';
 
 function parseCronRow(row: Record<string, unknown>): Cron {
-  const jobIdsCsv = row.job_ids_csv as string | null;
+  const { job_ids_csv, enabled, job_count, ...rest } = row;
   return {
-    ...(row as unknown as Cron),
-    job_count: (row.job_count as number) ?? 0,
-    job_ids: jobIdsCsv ? jobIdsCsv.split(',').map(Number) : [],
+    ...(rest as unknown as Cron),
+    enabled: Boolean(enabled),
+    job_count: (job_count as number) ?? 0,
+    job_ids: job_ids_csv ? (job_ids_csv as string).split(',').map(Number) : [],
   };
 }
 

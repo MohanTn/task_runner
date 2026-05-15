@@ -54,6 +54,21 @@ export class CronScheduler extends EventEmitter {
     return this.cronJobs.size;
   }
 
+  private getBaseCommand(job: Job): string {
+    if (job.repo_id) {
+      const repo = this.db.prepare('SELECT ai_type FROM repos WHERE id = ?').get(job.repo_id) as
+        | { ai_type: string }
+        | undefined;
+      if (repo) {
+        const config = this.db
+          .prepare('SELECT command_template FROM cli_configs WHERE cli_name = ?')
+          .get(repo.ai_type) as { command_template: string } | undefined;
+        if (config) return config.command_template;
+      }
+    }
+    return job.command;
+  }
+
   destroy(): void {
     this.stop();
     this.removeAllListeners();
@@ -97,7 +112,8 @@ export class CronScheduler extends EventEmitter {
     );
 
     for (const job of jobs) {
-      launchInWindowsTerminal(job.repo_path, job.command, job.name).catch((err) => {
+      const baseCommand = this.getBaseCommand(job);
+      launchInWindowsTerminal(job.repo_path, baseCommand, job.prompt || '', job.name).catch((err) => {
         console.error(`[cron] Failed to launch job "${job.name}": ${err.message}`);
       });
       if (job.run_mode === 'single') disableJob.run(job.id);

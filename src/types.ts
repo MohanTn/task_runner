@@ -8,6 +8,8 @@ export interface Job {
   enabled: boolean;
   timeout_seconds: number;
   run_mode: RunMode;
+  repo_id: number | null;
+  prompt: string;
   created_at: string;
   updated_at: string;
 }

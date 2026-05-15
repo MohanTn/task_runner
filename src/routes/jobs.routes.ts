@@ -9,7 +9,9 @@ interface StoredJob extends Job {
 }
 
 const JOB_WITH_REPO_SQL = `
-  SELECT j.*, r.name AS repo_name, r.path AS repo_path, r.ai_type
+  SELECT j.*,
+         r.name AS repo_name, r.path AS repo_path, r.ai_type,
+         (SELECT cj.cron_id FROM cron_jobs cj WHERE cj.job_id = j.id LIMIT 1) AS cron_id
   FROM jobs j
   LEFT JOIN repos r ON r.id = j.repo_id
 `;
@@ -22,7 +24,7 @@ function getAllJobsWithRepo(db: Database.Database): object[] {
   return db.prepare(`${JOB_WITH_REPO_SQL} ORDER BY j.name`).all() as object[];
 }
 
-function buildCommand(db: Database.Database, repoId: number, prompt: string): string | null {
+function buildCommand(db: Database.Database, repoId: number, _prompt: string): string | null {
   const repo = db.prepare('SELECT ai_type FROM repos WHERE id = ?').get(repoId) as
     | { ai_type: string }
     | undefined;
@@ -31,7 +33,8 @@ function buildCommand(db: Database.Database, repoId: number, prompt: string): st
     .prepare('SELECT command_template FROM cli_configs WHERE cli_name = ?')
     .get(repo.ai_type) as { command_template: string } | undefined;
   if (!config) return null;
-  return `${config.command_template} "${prompt.trim()}"`;
+  // Returns template only — prompt is passed via temp file at execution time
+  return config.command_template;
 }
 
 export function createJobsRouter(db: Database.Database): Router {
@@ -48,7 +51,7 @@ export function createJobsRouter(db: Database.Database): Router {
   });
 
   router.post('/', (req, res) => {
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } =
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode, cron_id } =
       req.body;
     if (!name?.trim()) throw new ValidationError('name is required');
 
@@ -95,7 +98,14 @@ export function createJobsRouter(db: Database.Database): Router {
         finalRunMode,
       );
 
-    res.status(201).json(getJobWithRepo(db, Number(result.lastInsertRowid))!);
+    const newJobId = Number(result.lastInsertRowid);
+    if (cron_id) {
+      const cronExists = db.prepare('SELECT id FROM crons WHERE id = ?').get(Number(cron_id));
+      if (!cronExists) throw new ValidationError('Cron not found');
+      db.prepare('INSERT OR IGNORE INTO cron_jobs (cron_id, job_id) VALUES (?, ?)').run(Number(cron_id), newJobId);
+    }
+
+    res.status(201).json(getJobWithRepo(db, newJobId)!);
   });
 
   router.put('/:id', (req, res) => {
@@ -104,7 +114,7 @@ export function createJobsRouter(db: Database.Database): Router {
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode } =
+    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode, cron_id } =
       req.body;
     if (name !== undefined && !name.trim()) throw new ValidationError('name cannot be empty');
 
@@ -154,6 +164,15 @@ export function createJobsRouter(db: Database.Database): Router {
       updatedRunMode,
       job.id,
     );
+
+    if ('cron_id' in req.body) {
+      db.prepare('DELETE FROM cron_jobs WHERE job_id = ?').run(job.id);
+      if (cron_id) {
+        const cronExists = db.prepare('SELECT id FROM crons WHERE id = ?').get(Number(cron_id));
+        if (!cronExists) throw new ValidationError('Cron not found');
+        db.prepare('INSERT OR IGNORE INTO cron_jobs (cron_id, job_id) VALUES (?, ?)').run(Number(cron_id), job.id);
+      }
+    }
 
     res.json(getJobWithRepo(db, job.id)!);
   });

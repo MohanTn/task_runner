@@ -12,6 +12,7 @@ export interface Job {
   prompt: string;
   repo_name?: string;
   ai_type?: string;
+  cron_id?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -25,6 +26,7 @@ export interface JobCreateInput {
   enabled?: boolean;
   timeout_seconds?: number;
   run_mode?: RunMode;
+  cron_id?: number | null;
 }
 
 export interface JobUpdateInput {
@@ -36,4 +38,5 @@ export interface JobUpdateInput {
   enabled?: boolean;
   timeout_seconds?: number;
   run_mode?: RunMode;
+  cron_id?: number | null;
 }

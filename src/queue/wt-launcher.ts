@@ -42,14 +42,24 @@ export function isWtAvailable(): boolean {
   return true;
 }
 
-export function launchInWindowsTerminal(repoPath: string, command: string, jobName: string): Promise<void> {
+export function launchInWindowsTerminal(
+  repoPath: string,
+  command: string,
+  prompt: string,
+  jobName: string,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     // Write a temp script so no semicolons or special chars reach wt.exe's arg parser
     // (wt uses ";" as its own command separator — passing "bash -c '...; ...'" breaks it)
     const tmpDir = mkdtempSync(join(tmpdir(), 'task-runner-'));
     const scriptPath = join(tmpDir, 'run.sh');
+    const promptPath = join(tmpDir, 'prompt.txt');
     const safePath = escapeForShell(repoPath);
     const safeTmpDir = escapeForShell(tmpDir);
+    const safePromptPath = escapeForShell(promptPath);
+
+    // Write prompt to temp file — avoids all shell escaping issues
+    writeFileSync(promptPath, prompt, 'utf-8');
 
     const { shellPath, shellName } = getUserShell();
     const rcBlock = buildRcSourceBlock(shellName);
@@ -69,13 +79,16 @@ cd '${safePath}' || {
 }
 echo "[task-runner] \$ cd ${safePath}"
 
-# ── 3. Run command ────────────────────────────────────────────────────────────
+# ── 3. Read prompt from temp file ─────────────────────────────────────────────
+PROMPT=$(cat '${safePromptPath}')
+
+# ── 4. Run command ────────────────────────────────────────────────────────────
 echo "[task-runner] \$ ${command}"
 echo
-eval '${escapeForShell(command)}'
+${command} "\$PROMPT"
 _exit=$?
 echo
-echo "--- exit $_exit ---"
+echo "--- exit \$_exit ---"
 ${readPrompt}
 rm -rf '${safeTmpDir}'
 `;
@@ -86,8 +99,9 @@ rm -rf '${safeTmpDir}'
       'wt.exe',
       // wsl.exe is a Windows binary — it resolves Linux paths like /bin/bash and /tmp/...
       // wt.exe cannot resolve Linux paths directly, so we bridge through wsl.exe.
-      // -l = login shell so $PATH from /etc/profile.d/* is populated before our rc sources
-      ['nt', '--title', `Job: ${jobName}`, '--', 'wsl.exe', '--', shellPath, '-l', scriptPath],
+      // -l = login shell so $PATH from /etc/profile.d/* is populated
+      // -i = interactive so .bashrc/.zshrc runs (which sets up nvm, npm, ~/.local/bin, etc.)
+      ['nt', '--title', `Job: ${jobName}`, '--', 'wsl.exe', '--', shellPath, '-i', '-l', scriptPath],
       { detached: true, stdio: 'ignore' },
     );
 
