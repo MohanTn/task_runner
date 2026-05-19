@@ -11,6 +11,7 @@ export interface Job {
   repo_id: number | null;
   prompt: string;
   pre_cmd: string;
+  post_cmd: string;
   repo_name?: string;
   ai_type?: string;
   cron_id?: number | null;
@@ -25,6 +26,7 @@ export interface JobCreateInput {
   repo_id?: number;
   prompt?: string;
   pre_cmd?: string;
+  post_cmd?: string;
   enabled?: boolean;
   timeout_seconds?: number;
   run_mode?: RunMode;
@@ -38,6 +40,7 @@ export interface JobUpdateInput {
   repo_id?: number | null;
   prompt?: string;
   pre_cmd?: string;
+  post_cmd?: string;
   enabled?: boolean;
   timeout_seconds?: number;
   run_mode?: RunMode;

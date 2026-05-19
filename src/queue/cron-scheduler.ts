@@ -116,7 +116,7 @@ export class CronScheduler extends EventEmitter {
 
     for (const job of jobs) {
       const baseCommand = this.getBaseCommand(job);
-      launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '').catch((err: Error) => {
+      launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '', job.post_cmd || '').catch((err: Error) => {
         console.error(`[cron] Failed to launch job "${job.name}": ${err.message}`);
       });
       if (job.run_mode === 'single') disableJob.run(job.id);

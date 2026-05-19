@@ -43,6 +43,13 @@
 }
 
 
+.optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.7;
+}
+
 .cliHint {
   font-size: 11px;
   color: var(--text-2);

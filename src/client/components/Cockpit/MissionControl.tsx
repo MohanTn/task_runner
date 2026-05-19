@@ -47,7 +47,7 @@ export function MissionControl() {
   }
 
   async function handleJobSave(
-    data: { name: string; repo_id: number; prompt: string; timeout_seconds: number; cron_id: number | null },
+    data: { name: string; repo_id: number; prompt: string; pre_cmd: string; post_cmd: string; timeout_seconds: number; cron_id: number | null },
     jobId?: number,
   ) {
     if (jobId) await jobApi.update(jobId, data as JobUpdateInput);

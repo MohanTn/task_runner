@@ -42,6 +42,7 @@ function buildJobScript(
   promptPath: string,
   tmpDir: string,
   preCmd?: string,
+  postCmd?: string,
 ): string {
   const safePath = escapeForShell(repoPath);
   const safeTmpDir = escapeForShell(tmpDir);
@@ -59,6 +60,13 @@ if [ $_pre_exit -ne 0 ]; then
   ${readPrompt}
   exit $_pre_exit
 fi
+`
+    : '';
+
+  const postCmdBlock = postCmd?.trim()
+    ? `
+echo "[task-runner] \$ ${postCmd}"
+${postCmd}
 `
     : '';
 
@@ -82,6 +90,7 @@ ${command} "\$PROMPT"
 _exit=$?
 echo
 echo "--- exit \$_exit ---"
+${postCmdBlock}
 ${readPrompt}
 rm -rf '${safeTmpDir}'
 `;
@@ -98,6 +107,7 @@ function launchInWindowsTerminal(
   prompt: string,
   jobName: string,
   preCmd?: string,
+  postCmd?: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'task-runner-'));
@@ -108,7 +118,7 @@ function launchInWindowsTerminal(
     const { shellPath, shellName } = getUserShell();
     writeFileSync(
       scriptPath,
-      buildJobScript(shellPath, shellName, repoPath, command, promptPath, tmpDir, preCmd),
+      buildJobScript(shellPath, shellName, repoPath, command, promptPath, tmpDir, preCmd, postCmd),
       { mode: 0o755 },
     );
 
@@ -130,6 +140,7 @@ function launchInPowerShell(
   prompt: string,
   jobName: string,
   preCmd?: string,
+  postCmd?: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'task-runner-'));
@@ -141,7 +152,7 @@ function launchInPowerShell(
     const { shellPath, shellName } = getUserShell();
     writeFileSync(
       scriptPath,
-      buildJobScript(shellPath, shellName, repoPath, command, promptPath, tmpDir, preCmd),
+      buildJobScript(shellPath, shellName, repoPath, command, promptPath, tmpDir, preCmd, postCmd),
       { mode: 0o755 },
     );
 
@@ -179,7 +190,8 @@ export function launchTerminal(
   prompt: string,
   jobName: string,
   preCmd?: string,
+  postCmd?: string,
 ): Promise<void> {
-  if (mode === 'wt') return launchInWindowsTerminal(repoPath, command, prompt, jobName, preCmd);
-  return launchInPowerShell(repoPath, command, prompt, jobName, preCmd);
+  if (mode === 'wt') return launchInWindowsTerminal(repoPath, command, prompt, jobName, preCmd, postCmd);
+  return launchInPowerShell(repoPath, command, prompt, jobName, preCmd, postCmd);
 }

@@ -11,6 +11,7 @@ export interface Job {
   repo_id: number | null;
   prompt: string;
   pre_cmd: string;
+  post_cmd: string;
   created_at: string;
   updated_at: string;
 }

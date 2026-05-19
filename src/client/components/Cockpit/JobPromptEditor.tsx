@@ -9,6 +9,8 @@ interface SaveData {
   name: string;
   repo_id: number;
   prompt: string;
+  pre_cmd: string;
+  post_cmd: string;
   timeout_seconds: number;
   run_mode: RunMode;
   cron_id: number | null;
@@ -18,6 +20,8 @@ interface FormState {
   name: string;
   repoId: number | '';
   prompt: string;
+  preCmd: string;
+  postCmd: string;
   timeoutSeconds: number;
   runMode: RunMode;
   cronId: number | '';
@@ -39,6 +43,8 @@ function buildInitialForm(job: Job | undefined): FormState {
     name: job?.name ?? '',
     repoId: job?.repo_id ?? '',
     prompt: job?.prompt ?? '',
+    preCmd: job?.pre_cmd ?? '',
+    postCmd: job?.post_cmd ?? '',
     timeoutSeconds: job?.timeout_seconds ?? 1800,
     runMode: job?.run_mode ?? 'multiple',
     cronId: job?.cron_id ?? '',
@@ -61,6 +67,8 @@ export function JobPromptEditor({ job, repos, cliConfigs, crons, onSave, onCance
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) { setForm((s) => ({ ...s, name: e.target.value })); }
   function handleRepoChange(e: React.ChangeEvent<HTMLSelectElement>) { setForm((s) => ({ ...s, repoId: Number(e.target.value) || '' })); }
   function handlePromptChange(e: React.ChangeEvent<HTMLTextAreaElement>) { setForm((s) => ({ ...s, prompt: e.target.value })); }
+  function handlePreCmdChange(e: React.ChangeEvent<HTMLTextAreaElement>) { setForm((s) => ({ ...s, preCmd: e.target.value })); }
+  function handlePostCmdChange(e: React.ChangeEvent<HTMLTextAreaElement>) { setForm((s) => ({ ...s, postCmd: e.target.value })); }
   function handleTimeoutChange(e: React.ChangeEvent<HTMLInputElement>) { setForm((s) => ({ ...s, timeoutSeconds: Number(e.target.value) })); }
   function handleCronChange(e: React.ChangeEvent<HTMLSelectElement>) { setForm((s) => ({ ...s, cronId: Number(e.target.value) || '' })); }
   function handleRunModeMultiple() { setForm((s) => ({ ...s, runMode: 'multiple' })); }
@@ -77,6 +85,8 @@ export function JobPromptEditor({ job, repos, cliConfigs, crons, onSave, onCance
         name: form.name.trim(),
         repo_id: form.repoId as number,
         prompt: form.prompt.trim(),
+        pre_cmd: form.preCmd.trim(),
+        post_cmd: form.postCmd.trim(),
         timeout_seconds: form.timeoutSeconds,
         run_mode: form.runMode,
         cron_id: form.cronId ? (form.cronId as number) : null,
@@ -116,6 +126,28 @@ export function JobPromptEditor({ job, repos, cliConfigs, crons, onSave, onCance
             rows={3}
           />
           {selectedRepo && <span className={styles.cliHint}>CLI: {selectedRepo.ai_type}</span>}
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Pre-Command <span className={styles.optional}>(optional)</span></label>
+          <textarea
+            className="f-textarea"
+            value={form.preCmd}
+            onChange={handlePreCmdChange}
+            placeholder="git fetch origin && git reset --hard origin/main"
+            rows={2}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>Post-Command <span className={styles.optional}>(optional)</span></label>
+          <textarea
+            className="f-textarea"
+            value={form.postCmd}
+            onChange={handlePostCmdChange}
+            placeholder='powershell.exe -c "(New-Object Media.SoundPlayer).PlaySync()"'
+            rows={2}
+          />
         </div>
 
         {commandPreview && (
