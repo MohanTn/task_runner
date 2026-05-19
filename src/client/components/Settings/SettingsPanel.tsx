@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
+import { CliSettings } from '../Cockpit/CliSettings.js';
 import styles from './SettingsPanel.module.css';
 
 export function SettingsPanel() {
-  const { settings, refreshSettings } = useAppState();
+  const { settings, cliConfigs, refreshSettings, refreshAll } = useAppState();
 
   const [wtPath, setWtPath] = useState(settings?.wt_exe_path ?? 'wt.exe');
   const [psPath, setPsPath] = useState(settings?.powershell_exe_path ?? 'powershell.exe');
@@ -55,7 +56,7 @@ export function SettingsPanel() {
             </button>
           </div>
           <p className={styles.hint}>
-            Each job fires on its own schedule — configure it in the job editor.
+            Each job fires on its own schedule — configure it in the Schedules tab.
           </p>
         </div>
 
@@ -95,11 +96,14 @@ export function SettingsPanel() {
             />
           </div>
           <p className={styles.hint}>
-            The selected mode is tried first; the other is the automatic fallback. If both fail, an
-            error banner appears on the Dashboard. Use full paths (e.g.{' '}
-            <code>C:\Users\you\AppData\Local\Microsoft\WindowsApps\wt.exe</code>) if the executable
-            is not on the system PATH.
+            The selected mode is tried first; the other is the automatic fallback. Use full paths
+            (e.g. <code>C:\Users\you\AppData\Local\Microsoft\WindowsApps\wt.exe</code>) if the
+            executable is not on the system PATH.
           </p>
+        </div>
+
+        <div className={`${styles.card} ${styles.cliCard}`}>
+          <CliSettings cliConfigs={cliConfigs} onChanged={refreshAll} />
         </div>
       </div>
     </div>

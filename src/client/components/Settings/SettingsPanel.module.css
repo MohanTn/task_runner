@@ -120,6 +120,10 @@
   border-color: var(--color-primary);
 }
 
+.cliCard {
+  overflow: auto;
+}
+
 .dangerBtn {
   padding: 10px 20px;
   background: rgba(239, 68, 68, 0.1);
