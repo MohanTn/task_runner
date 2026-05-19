@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import Database from 'better-sqlite3';
 import type { Job, Cron } from '../types.js';
-import { launchInWindowsTerminal } from './wt-launcher.js';
+import { launchTerminal, type TerminalMode } from './terminal-launcher.js';
 
 export class CronScheduler extends EventEmitter {
   private cronJobs: Map<number, CronJob> = new Map();
@@ -111,9 +111,12 @@ export class CronScheduler extends EventEmitter {
       "UPDATE jobs SET enabled = 0, updated_at = datetime('now') WHERE id = ?",
     );
 
+    const modeRow = this.db.prepare("SELECT value FROM settings WHERE key = 'terminal_mode'").get() as { value: string } | undefined;
+    const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'powershell';
+
     for (const job of jobs) {
       const baseCommand = this.getBaseCommand(job);
-      launchInWindowsTerminal(job.repo_path, baseCommand, job.prompt || '', job.name).catch((err) => {
+      launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '').catch((err: Error) => {
         console.error(`[cron] Failed to launch job "${job.name}": ${err.message}`);
       });
       if (job.run_mode === 'single') disableJob.run(job.id);

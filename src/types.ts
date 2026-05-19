@@ -10,6 +10,7 @@ export interface Job {
   run_mode: RunMode;
   repo_id: number | null;
   prompt: string;
+  pre_cmd: string;
   created_at: string;
   updated_at: string;
 }
@@ -57,5 +58,6 @@ export interface CronUpdateInput {
 
 export interface Settings {
   cron_enabled: boolean;
+  terminal_mode?: 'wt' | 'powershell';
   [key: string]: unknown;
 }

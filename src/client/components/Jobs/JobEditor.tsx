@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useCallback, type FormEvent } from 'react';
 import type { Job, JobCreateInput, JobUpdateInput, RunMode } from '../../types/jobs.js';
 import styles from './JobEditor.module.css';
 
@@ -8,50 +8,72 @@ interface JobEditorProps {
   onClose: () => void;
 }
 
+interface FormState {
+  name: string;
+  repoPath: string;
+  command: string;
+  preCmd: string;
+  timeoutSeconds: number;
+  runMode: RunMode;
+  saving: boolean;
+  error: string | null;
+}
+
 export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
-  const [name, setName] = useState(job?.name ?? '');
-  const [repoPath, setRepoPath] = useState(job?.repo_path ?? '');
-  const [command, setCommand] = useState(job?.command ?? '');
-  const [timeoutSeconds, setTimeoutSeconds] = useState(job?.timeout_seconds ?? 1800);
-  const [runMode, setRunMode] = useState<RunMode>(job?.run_mode ?? 'multiple');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>({
+    name: job?.name ?? '',
+    repoPath: job?.repo_path ?? '',
+    command: job?.command ?? '',
+    preCmd: job?.pre_cmd ?? '',
+    timeoutSeconds: job?.timeout_seconds ?? 1800,
+    runMode: job?.run_mode ?? 'multiple',
+    saving: false,
+    error: null,
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
+  const set = useCallback(
+    (patch: Partial<FormState>) => setForm(s => ({ ...s, ...patch })),
+    [],
+  );
+
+  const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    set({ error: null });
 
-    if (!name.trim()) { setError('Name is required'); return; }
-    if (!repoPath.trim()) { setError('Repo path is required'); return; }
-    if (!command.trim()) { setError('Command is required'); return; }
+    if (!form.name.trim()) { set({ error: 'Name is required' }); return; }
+    if (!form.repoPath.trim()) { set({ error: 'Repo path is required' }); return; }
+    if (!form.command.trim()) { set({ error: 'Command is required' }); return; }
 
-    setSaving(true);
+    set({ saving: true });
     try {
       await onSave({
-        name: name.trim(),
-        repo_path: repoPath.trim(),
-        command: command.trim(),
-        timeout_seconds: timeoutSeconds,
-        run_mode: runMode,
+        name: form.name.trim(),
+        repo_path: form.repoPath.trim(),
+        command: form.command.trim(),
+        pre_cmd: form.preCmd.trim(),
+        timeout_seconds: form.timeoutSeconds,
+        run_mode: form.runMode,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save job');
+      set({ error: err instanceof Error ? err.message : 'Failed to save job' });
     } finally {
-      setSaving(false);
+      set({ saving: false });
     }
-  };
+  }, [form, onSave, set]);
+
+  const stopProp = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <form className={styles.modal} onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
+      <form className={styles.modal} onSubmit={handleSubmit} onClick={stopProp}>
         <h2 className={styles.title}>{job ? 'Edit Job' : 'Add Job'}</h2>
 
         <div className={styles.field}>
           <label className={styles.label}>Name</label>
           <input
             className={styles.input}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={form.name}
+            onChange={(e) => set({ name: e.target.value })}
             placeholder="review-mr-1122"
           />
         </div>
@@ -60,8 +82,8 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
           <label className={styles.label}>Repo Path</label>
           <input
             className={styles.input}
-            value={repoPath}
-            onChange={(e) => setRepoPath(e.target.value)}
+            value={form.repoPath}
+            onChange={(e) => set({ repoPath: e.target.value })}
             placeholder="/home/user/project"
           />
         </div>
@@ -70,10 +92,23 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
           <label className={styles.label}>Command</label>
           <textarea
             className={styles.textarea}
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
+            value={form.command}
+            onChange={(e) => set({ command: e.target.value })}
             placeholder='claude --dangerously-skip-permissions --model haiku4.5 -p "/review-mr 1122"'
             rows={3}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>
+            Pre-Command <span className={styles.optional}>(optional)</span>
+          </label>
+          <textarea
+            className={styles.textarea}
+            value={form.preCmd}
+            onChange={(e) => set({ preCmd: e.target.value })}
+            placeholder="git fetch origin && git reset --hard origin/main"
+            rows={2}
           />
         </div>
 
@@ -82,8 +117,8 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
           <input
             className={styles.input}
             type="number"
-            value={timeoutSeconds}
-            onChange={(e) => setTimeoutSeconds(Number(e.target.value))}
+            value={form.timeoutSeconds}
+            onChange={(e) => set({ timeoutSeconds: Number(e.target.value) })}
             min={10}
             max={86400}
           />
@@ -94,8 +129,8 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
           <div className={styles.scheduleToggle}>
             <button
               type="button"
-              className={`${styles.scheduleOption} ${runMode === 'multiple' ? styles.scheduleActive : ''}`}
-              onClick={() => setRunMode('multiple')}
+              className={`${styles.scheduleOption} ${form.runMode === 'multiple' ? styles.scheduleActive : ''}`}
+              onClick={() => set({ runMode: 'multiple' })}
             >
               <span className={styles.scheduleIcon}>∞</span>
               <span className={styles.scheduleLabel}>Multiple</span>
@@ -103,8 +138,8 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
             </button>
             <button
               type="button"
-              className={`${styles.scheduleOption} ${runMode === 'single' ? styles.scheduleActive : ''}`}
-              onClick={() => setRunMode('single')}
+              className={`${styles.scheduleOption} ${form.runMode === 'single' ? styles.scheduleActive : ''}`}
+              onClick={() => set({ runMode: 'single' })}
             >
               <span className={styles.scheduleIcon}>1</span>
               <span className={styles.scheduleLabel}>Single</span>
@@ -113,14 +148,14 @@ export function JobEditor({ job, onSave, onClose }: JobEditorProps) {
           </div>
         </div>
 
-        {error && <p className={styles.error}>{error}</p>}
+        {form.error && <p className={styles.error}>{form.error}</p>}
 
         <div className={styles.actions}>
           <button type="button" className={styles.cancelBtn} onClick={onClose}>
             Cancel
           </button>
-          <button type="submit" className={styles.saveBtn} disabled={saving}>
-            {saving ? 'Saving...' : job ? 'Update' : 'Create'}
+          <button type="submit" className={styles.saveBtn} disabled={form.saving}>
+            {form.saving ? 'Saving...' : job ? 'Update' : 'Create'}
           </button>
         </div>
       </form>

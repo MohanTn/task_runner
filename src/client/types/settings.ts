@@ -1,5 +1,6 @@
 export interface Settings {
   cron_enabled: boolean;
+  terminal_mode?: 'wt' | 'powershell';
   [key: string]: unknown;
 }
 

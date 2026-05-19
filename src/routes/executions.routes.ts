@@ -2,7 +2,7 @@ import { Router } from 'express';
 import Database from 'better-sqlite3';
 import type { Job } from '../types.js';
 import { NotFoundError, ValidationError, AppError } from '../errors.js';
-import { launchInWindowsTerminal } from '../queue/wt-launcher.js';
+import { launchTerminal, type TerminalMode } from '../queue/terminal-launcher.js';
 
 function getBaseCommand(db: Database.Database, job: Job): string {
   if (job.repo_id) {
@@ -31,7 +31,9 @@ export function createExecutionsRouter(db: Database.Database): Router {
       if (!job) throw new NotFoundError('Job not found');
 
       const baseCommand = getBaseCommand(db, job);
-      await launchInWindowsTerminal(job.repo_path, baseCommand, job.prompt || '', job.name);
+      const modeRow = db.prepare("SELECT value FROM settings WHERE key = 'terminal_mode'").get() as { value: string } | undefined;
+      const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'powershell';
+      await launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '');
 
       if (job.run_mode === 'single') {
         db.prepare(`UPDATE jobs SET enabled = 0, updated_at = datetime('now') WHERE id = ?`).run(job.id);

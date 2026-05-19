@@ -12,7 +12,7 @@ import { createReposRouter } from './routes/repos.routes.js';
 import { createCliConfigsRouter } from './routes/cli-configs.routes.js';
 import { createCronsRouter } from './routes/crons.routes.js';
 import { NotFoundError, ValidationError, ConflictError, AppError } from './errors.js';
-import { isWtAvailable } from './queue/wt-launcher.js';
+import { isWtAvailable } from './queue/terminal-launcher.js';
 
 export interface ServerInstance {
   httpServer: HttpServer;
@@ -28,8 +28,8 @@ export function buildServer(): ServerInstance {
   app.use(express.json());
 
   if (!isWtAvailable()) {
-    console.warn('[task-runner] WARNING: Running inside Docker — wt.exe is unreachable.');
-    console.warn('[task-runner] To open Windows Terminal tabs, run the server directly on WSL2: npm start');
+    console.warn('[task-runner] WARNING: Running inside Docker — Windows terminal interop is unreachable.');
+    console.warn('[task-runner] To launch jobs in a terminal, run the server directly on WSL2: npm start');
   }
 
   const cronScheduler = new CronScheduler(db);

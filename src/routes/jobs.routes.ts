@@ -51,7 +51,7 @@ export function createJobsRouter(db: Database.Database): Router {
   });
 
   router.post('/', (req, res) => {
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode, cron_id } =
+    const { name, repo_id, repo_path, command, prompt, pre_cmd, enabled, timeout_seconds, run_mode, cron_id } =
       req.body;
     if (!name?.trim()) throw new ValidationError('name is required');
 
@@ -63,6 +63,7 @@ export function createJobsRouter(db: Database.Database): Router {
     let finalRepoPath: string;
     let finalRepoId: number | null = repo_id ?? null;
     let finalPrompt = prompt ?? '';
+    const finalPreCmd: string = pre_cmd?.trim() ?? '';
 
     if (repo_id && prompt?.trim()) {
       const cmd = buildCommand(db, repo_id, prompt);
@@ -84,8 +85,8 @@ export function createJobsRouter(db: Database.Database): Router {
 
     const result = db
       .prepare(
-        `INSERT INTO jobs (name, repo_path, command, repo_id, prompt, enabled, timeout_seconds, run_mode)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO jobs (name, repo_path, command, repo_id, prompt, pre_cmd, enabled, timeout_seconds, run_mode)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         name.trim(),
@@ -93,6 +94,7 @@ export function createJobsRouter(db: Database.Database): Router {
         finalCommand,
         finalRepoId,
         finalPrompt,
+        finalPreCmd,
         enabled !== false ? 1 : 0,
         timeout_seconds ?? 1800,
         finalRunMode,
@@ -114,7 +116,7 @@ export function createJobsRouter(db: Database.Database): Router {
       | undefined;
     if (!job) throw new NotFoundError('Job not found');
 
-    const { name, repo_id, repo_path, command, prompt, enabled, timeout_seconds, run_mode, cron_id } =
+    const { name, repo_id, repo_path, command, prompt, pre_cmd, enabled, timeout_seconds, run_mode, cron_id } =
       req.body;
     if (name !== undefined && !name.trim()) throw new ValidationError('name cannot be empty');
 
@@ -127,6 +129,7 @@ export function createJobsRouter(db: Database.Database): Router {
 
     const updatedRepoId = repo_id !== undefined ? repo_id : job.repo_id;
     const updatedPrompt = prompt !== undefined ? prompt : job.prompt;
+    const updatedPreCmd = pre_cmd !== undefined ? pre_cmd.trim() : job.pre_cmd;
     const updatedRunMode =
       run_mode === 'single' ? 'single' : run_mode === 'multiple' ? 'multiple' : job.run_mode;
 
@@ -150,7 +153,7 @@ export function createJobsRouter(db: Database.Database): Router {
     }
 
     db.prepare(
-      `UPDATE jobs SET name = ?, repo_path = ?, command = ?, repo_id = ?, prompt = ?,
+      `UPDATE jobs SET name = ?, repo_path = ?, command = ?, repo_id = ?, prompt = ?, pre_cmd = ?,
        enabled = ?, timeout_seconds = ?, run_mode = ?, updated_at = datetime('now')
        WHERE id = ?`,
     ).run(
@@ -159,6 +162,7 @@ export function createJobsRouter(db: Database.Database): Router {
       updatedCommand,
       updatedRepoId,
       updatedPrompt,
+      updatedPreCmd,
       enabled !== undefined ? (enabled ? 1 : 0) : (job.enabled ? 1 : 0),
       timeout_seconds ?? job.timeout_seconds,
       updatedRunMode,
