@@ -1,208 +1,91 @@
-@import './variables.css';
+@import "tailwindcss";
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@custom-variant dark (&:where(.dark, .dark *));
 
-html { font-size: 17px; }
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, monospace;
+
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+
+  --radius-card: 0.625rem;
+}
+
+/* Semantic tokens — light theme defaults */
+:root {
+  --c-bg:          #f6f7f9;
+  --c-surface:     #ffffff;
+  --c-surface-2:   #f3f4f6;
+  --c-surface-3:   #e5e7eb;
+  --c-border:      #e5e7eb;
+  --c-border-2:    #d1d5db;
+  --c-text:        #111827;
+  --c-text-2:      #4b5563;
+  --c-text-3:      #6b7280;
+  --c-accent:      #4f46e5;
+  --c-accent-soft: rgba(79, 70, 229, 0.10);
+  --c-success:     #16a34a;
+  --c-success-soft:rgba(22, 163, 74, 0.12);
+  --c-warning:     #d97706;
+  --c-warning-soft:rgba(217, 119, 6, 0.12);
+  --c-danger:      #dc2626;
+  --c-danger-soft: rgba(220, 38, 38, 0.10);
+  --c-info:        #2563eb;
+  --c-info-soft:   rgba(37, 99, 235, 0.10);
+  --c-overlay:     rgba(15, 23, 42, 0.45);
+  --c-ring:        rgba(79, 70, 229, 0.35);
+}
+
+.dark {
+  --c-bg:          #0b0f17;
+  --c-surface:     #131825;
+  --c-surface-2:   #1a2030;
+  --c-surface-3:   #232a3d;
+  --c-border:      #232a3d;
+  --c-border-2:    #2d3550;
+  --c-text:        #e6e9f2;
+  --c-text-2:      #a8b0c4;
+  --c-text-3:      #6b7491;
+  --c-accent:      #818cf8;
+  --c-accent-soft: rgba(129, 140, 248, 0.14);
+  --c-success:     #34d399;
+  --c-success-soft:rgba(52, 211, 153, 0.14);
+  --c-warning:     #fbbf24;
+  --c-warning-soft:rgba(251, 191, 36, 0.14);
+  --c-danger:      #f87171;
+  --c-danger-soft: rgba(248, 113, 113, 0.14);
+  --c-info:        #60a5fa;
+  --c-info-soft:   rgba(96, 165, 250, 0.14);
+  --c-overlay:     rgba(2, 6, 23, 0.65);
+  --c-ring:        rgba(129, 140, 248, 0.45);
+}
+
 html, body, #root { height: 100%; }
-
+html { font-size: 14px; }
 body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.45;
+  font-family: var(--font-sans);
+  background: var(--c-bg);
+  color: var(--c-text);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-input, textarea, select, button { font-family: inherit; font-size: inherit; color: inherit; }
-button { cursor: pointer; border: none; background: none; }
-a { color: var(--accent); text-decoration: none; }
-
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+::-webkit-scrollbar-thumb { background: var(--c-border-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); }
 
-/* ═══════════════════════════════════════════════════════════
-   BUTTON SYSTEM — use className="btn btn-{variant}" in JSX
-   ═══════════════════════════════════════════════════════════ */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  height: var(--btn-h);
-  padding: 0 12px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background 0.12s, border-color 0.12s, color 0.12s, opacity 0.12s;
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--c-ring);
+  outline-offset: 1px;
 }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-
-/* Compact variant — 24px height */
-.btn-sm {
-  height: var(--btn-sm-h);
-  padding: 0 9px;
-  font-size: 13px;
-  border-radius: var(--radius-sm);
-}
-
-/* Filled — blue */
-.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
-
-/* Outlined — neutral */
-.btn-ghost { background: transparent; border-color: var(--border-2); color: var(--text); }
-.btn-ghost:hover:not(:disabled) { background: var(--surface-3); }
-
-/* Filled — muted surface */
-.btn-muted { background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
-.btn-muted:hover:not(:disabled) { color: var(--text); border-color: var(--text-2); }
-
-/* Text — accent color for inline actions */
-.btn-link { background: transparent; border-color: transparent; color: var(--accent); padding: 0 4px; }
-.btn-link:hover:not(:disabled) { text-decoration: underline; }
-
-/* Text — muted, turns red on hover for destructive actions */
-.btn-danger { background: transparent; border-color: transparent; color: var(--text-2); padding: 0 4px; }
-.btn-danger:hover:not(:disabled) { color: var(--danger); }
-
-/* Toggle — active/running state */
-.btn-on  { background: var(--success); color: #fff; border-color: var(--success); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.btn-on:hover:not(:disabled) { opacity: 0.88; }
-
-/* Toggle — inactive/stopped state */
-.btn-off { background: transparent; border-color: var(--border); color: var(--text-2); font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.btn-off:hover:not(:disabled) { border-color: var(--success); color: var(--success); }
-
-/* ═══════════════════════════════════════════════════════════
-   FORM CONTROLS — use className="f-input" / "f-select" etc.
-   ═══════════════════════════════════════════════════════════ */
-.f-input,
-.f-select {
-  height: var(--input-h);
-  padding: 0 10px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 14px;
-  width: 100%;
-  transition: border-color 0.12s;
-}
-.f-input:focus, .f-select:focus { outline: none; border-color: var(--accent); }
-
-.f-mono { font-family: var(--font-mono); }
-
-.f-textarea {
-  padding: 8px 10px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  width: 100%;
-  resize: vertical;
-  line-height: 1.55;
-  transition: border-color 0.12s;
-}
-.f-textarea:focus { outline: none; border-color: var(--accent); }
-
-/* ═══════════════════════════════════════════════════════════
-   SECTION STRUCTURE — use className="section" / "section-head" etc.
-   ═══════════════════════════════════════════════════════════ */
-.section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  padding: 0 var(--sp-4);
-  height: var(--section-head-h);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.section-body {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-.section-title {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-2);
-  flex: 1;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TABLE — use className="tbl"
-   ═══════════════════════════════════════════════════════════ */
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 1rem;
-}
-.tbl th {
-  text-align: left;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-2);
-  padding: 6px 14px;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-.tbl td {
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-.tbl tbody tr:last-child td { border-bottom: none; }
-.tbl tbody tr:hover td { background: var(--surface-2); }
-
-/* ═══════════════════════════════════════════════════════════
-   BADGES
-   ═══════════════════════════════════════════════════════════ */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  height: 20px;
-  padding: 0 7px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  border-radius: 10px;
-  white-space: nowrap;
-}
-
-.badge-claude   { background: var(--accent-2);           color: var(--accent); }
-.badge-copilot  { background: var(--success-2);          color: var(--success); }
-.badge-custom   { background: rgba(168, 85, 247, 0.12);  color: #a855f7; }
-.badge-single   { background: var(--accent-2);           color: var(--accent); }
-.badge-multiple { background: transparent; border: 1px solid var(--border); color: var(--text-2); }
-
-/* ═══════════════════════════════════════════════════════════
-   MISC UTILITIES
-   ═══════════════════════════════════════════════════════════ */
-.mono   { font-family: var(--font-mono); }
-.muted  { color: var(--text-2); }
-.danger { color: var(--danger); }
-.spacer { flex: 1; }
