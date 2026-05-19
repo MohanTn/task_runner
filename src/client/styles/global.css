@@ -2,7 +2,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 13px; }
+html { font-size: 16px; }
 html, body, #root { height: 100%; }
 
 body {
@@ -122,6 +122,8 @@ a { color: var(--accent); text-decoration: none; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .section-head {
@@ -132,6 +134,12 @@ a { color: var(--accent); text-decoration: none; }
   height: var(--section-head-h);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.section-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .section-title {
@@ -149,7 +157,7 @@ a { color: var(--accent); text-decoration: none; }
 .tbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 1rem;
 }
 .tbl th {
   text-align: left;

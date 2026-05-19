@@ -104,17 +104,19 @@ export function MissionControl() {
           </select>
           <button className="btn btn-sm btn-ghost" onClick={openAddJob}>+ Add</button>
         </div>
-        <JobsTable
-          jobs={jobs}
-          crons={crons}
-          runningMap={runningMap}
-          filterScheduleId={filterScheduleId}
-          onRun={handleRun}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-          onEdit={openEditJob}
-          onChanged={refreshAll}
-        />
+        <div className="section-body">
+          <JobsTable
+            jobs={jobs}
+            crons={crons}
+            runningMap={runningMap}
+            filterScheduleId={filterScheduleId}
+            onRun={handleRun}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+            onEdit={openEditJob}
+            onChanged={refreshAll}
+          />
+        </div>
       </section>
 
       {state.editingJob && (

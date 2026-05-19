@@ -52,37 +52,39 @@ export function CronsManager({ crons, jobs, cronEnabled, onCronToggle, onChanged
           <button className="btn btn-sm btn-ghost" onClick={mgr.openNew}>+ Add Cron</button>
         </div>
       </div>
-      <table className="tbl">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Schedule</th>
-            <th>Status</th>
-            <th>Linked Jobs</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {crons.map((cron) => (
-            <CronRow
-              key={cron.id}
-              cron={cron}
-              jobs={jobs}
-              onEdit={mgr.handleEdit}
-              onToggle={mgr.handleToggle}
-              onDelete={mgr.handleDelete}
-              onChanged={onChanged}
-            />
-          ))}
-          {crons.length === 0 && (
+      <div className="section-body">
+        <table className="tbl">
+          <thead>
             <tr>
-              <td className={styles.emptyCell} colSpan={5}>
-                No crons yet — click &quot;+ Add Cron&quot; to create one.
-              </td>
+              <th>Name</th>
+              <th>Schedule</th>
+              <th>Status</th>
+              <th>Linked Jobs</th>
+              <th>Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {crons.map((cron) => (
+              <CronRow
+                key={cron.id}
+                cron={cron}
+                jobs={jobs}
+                onEdit={mgr.handleEdit}
+                onToggle={mgr.handleToggle}
+                onDelete={mgr.handleDelete}
+                onChanged={onChanged}
+              />
+            ))}
+            {crons.length === 0 && (
+              <tr>
+                <td className={styles.emptyCell} colSpan={5}>
+                  No crons yet — click &quot;+ Add Cron&quot; to create one.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
       {mgr.state.editing !== null && (
         <CronEditorModal cron={editingCron} onSave={mgr.handleSave} onCancel={mgr.closeEditor} />
       )}

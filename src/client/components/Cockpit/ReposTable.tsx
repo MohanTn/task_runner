@@ -67,6 +67,7 @@ export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProp
         <span className="section-title">Repos</span>
         <button className="btn btn-sm btn-ghost" onClick={startAdd}>+ Add</button>
       </div>
+      <div className="section-body">
       <table className="tbl">
         <thead>
           <tr>
@@ -130,6 +131,7 @@ export function ReposTable({ repos, cliConfigs, onReposChanged }: ReposTableProp
           )}
         </tbody>
       </table>
+      </div>
     </>
   );
 }
