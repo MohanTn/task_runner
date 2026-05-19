@@ -112,11 +112,15 @@ export class CronScheduler extends EventEmitter {
     );
 
     const modeRow = this.db.prepare("SELECT value FROM settings WHERE key = 'terminal_mode'").get() as { value: string } | undefined;
-    const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'powershell';
+    const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'wt';
+    const wtPathRow = this.db.prepare("SELECT value FROM settings WHERE key = 'wt_exe_path'").get() as { value: string } | undefined;
+    const psPathRow = this.db.prepare("SELECT value FROM settings WHERE key = 'powershell_exe_path'").get() as { value: string } | undefined;
+    const wtExePath: string = wtPathRow ? (JSON.parse(wtPathRow.value) as string) : 'wt.exe';
+    const psExePath: string = psPathRow ? (JSON.parse(psPathRow.value) as string) : 'powershell.exe';
 
     for (const job of jobs) {
       const baseCommand = this.getBaseCommand(job);
-      launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '', job.post_cmd || '').catch((err: Error) => {
+      launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, wtExePath, psExePath, job.pre_cmd || '', job.post_cmd || '').catch((err: Error) => {
         console.error(`[cron] Failed to launch job "${job.name}": ${err.message}`);
       });
       if (job.run_mode === 'single') disableJob.run(job.id);

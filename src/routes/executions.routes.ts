@@ -32,8 +32,12 @@ export function createExecutionsRouter(db: Database.Database): Router {
 
       const baseCommand = getBaseCommand(db, job);
       const modeRow = db.prepare("SELECT value FROM settings WHERE key = 'terminal_mode'").get() as { value: string } | undefined;
-      const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'powershell';
-      await launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, job.pre_cmd || '', job.post_cmd || '');
+      const mode: TerminalMode = modeRow ? (JSON.parse(modeRow.value) as TerminalMode) : 'wt';
+      const wtPathRow = db.prepare("SELECT value FROM settings WHERE key = 'wt_exe_path'").get() as { value: string } | undefined;
+      const psPathRow = db.prepare("SELECT value FROM settings WHERE key = 'powershell_exe_path'").get() as { value: string } | undefined;
+      const wtExePath: string = wtPathRow ? (JSON.parse(wtPathRow.value) as string) : 'wt.exe';
+      const psExePath: string = psPathRow ? (JSON.parse(psPathRow.value) as string) : 'powershell.exe';
+      await launchTerminal(mode, job.repo_path, baseCommand, job.prompt || '', job.name, wtExePath, psExePath, job.pre_cmd || '', job.post_cmd || '');
 
       if (job.run_mode === 'single') {
         db.prepare(`UPDATE jobs SET enabled = 0, updated_at = datetime('now') WHERE id = ?`).run(job.id);

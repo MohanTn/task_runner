@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 
-const SCHEMA_VERSION = 15;
+const SCHEMA_VERSION = 16;
 
 const JOBS_TABLE_V11 = `
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -229,6 +229,15 @@ function migrateV14(db: Database.Database): void {
   }
 }
 
+function migrateV15(db: Database.Database): void {
+  db.prepare(
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('wt_exe_path', '\"wt.exe\"')"
+  ).run();
+  db.prepare(
+    "INSERT OR IGNORE INTO settings (key, value) VALUES ('powershell_exe_path', '\"powershell.exe\"')"
+  ).run();
+}
+
 const STEP_MAP: Record<number, (db: Database.Database) => void> = {
   1: migrateV1,
   2: migrateV2,
@@ -244,6 +253,7 @@ const STEP_MAP: Record<number, (db: Database.Database) => void> = {
   12: migrateV12,
   13: migrateV13,
   14: migrateV14,
+  15: migrateV15,
 };
 
 /**

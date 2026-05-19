@@ -10,7 +10,7 @@ A self-hosted AI task runner with a web cockpit. Schedule and run Claude Code / 
 ## Requirements
 
 - **Node.js 20+**
-- **Windows 11 / Windows 10** with [Windows Terminal](https://aka.ms/terminal) installed
+- **Windows 11 / Windows 10** with [Windows Terminal](https://aka.ms/terminal) (`wt.exe`) and/or PowerShell (`powershell.exe`) accessible from WSL2
 - **WSL2** — the server must run inside WSL2 so it can call `wt.exe` to open terminal tabs
 
 ---
@@ -40,10 +40,13 @@ Open [http://localhost:5222](http://localhost:5222).
 When you click **Run** on a job (or the cron scheduler fires), the server:
 
 1. Writes a small shell script to `/tmp/task-runner-XXXXX/run.sh`
-2. Calls `wt.exe nt --title "Job: name" -- bash -l /tmp/.../run.sh`
-3. A new Windows Terminal tab opens, runs the job, and waits for you to press Enter before closing
+2. Tries the preferred terminal (configured in **Settings → Terminal → Launch mode**):
+   - **wt mode**: calls `wt.exe nt --title "Job: name" -- wsl.exe -- bash -l /tmp/.../run.sh`
+   - **powershell mode**: calls `powershell.exe -Command Start-Process ...`
+3. If the preferred terminal fails to spawn, the other is tried automatically (**auto-fallback**)
+4. If both fail, an error banner appears on the Dashboard with instructions to configure the executable paths in **Settings → Terminal**
 
-No output is captured by the server — everything happens live in the terminal tab.
+No output is captured by the server — everything happens live in the terminal window.
 
 ---
 
@@ -63,6 +66,20 @@ No output is captured by the server — everything happens live in the terminal 
 | Variable | Default | Description |
 |---|---|---|
 | `PORT` | `5222` | HTTP server port |
+
+### Terminal Settings (Settings → Terminal)
+
+| Setting | Default | Description |
+|---|---|---|
+| **Launch mode** | `wt` | Preferred terminal: `wt` (Windows Terminal) or `powershell` |
+| **Windows Terminal path** | `wt.exe` | Absolute or PATH-relative path to `wt.exe` |
+| **PowerShell path** | `powershell.exe` | Absolute or PATH-relative path to `powershell.exe` |
+
+**Auto-fallback**: task-runner always tries the preferred mode first. If spawning fails, it automatically retries with the other terminal. If both fail, a red error banner appears on the Dashboard directing you to fix the paths here.
+
+**Custom paths** (when the executable is not on the system PATH):
+- `wt_exe_path`: `C:\Users\you\AppData\Local\Microsoft\WindowsApps\wt.exe`
+- `powershell_exe_path`: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
 
 ### Schedule Settings (Cockpit)
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
 import { executionApi } from '../../api/executions.api.js';
@@ -5,6 +6,7 @@ import styles from './Dashboard.module.css';
 
 export function Dashboard() {
   const { jobs, settings, refreshAll } = useAppState();
+  const [triggerError, setTriggerError] = useState<string | null>(null);
 
   const activeJobs = jobs.filter((j) => j.enabled).length;
   const singleRunJobs = jobs.filter((j) => j.run_mode === 'single').length;
@@ -19,12 +21,24 @@ export function Dashboard() {
   };
 
   const handleManualTrigger = async (jobId: number) => {
-    await executionApi.trigger(jobId);
-    await refreshAll();
+    setTriggerError(null);
+    try {
+      await executionApi.trigger(jobId);
+      await refreshAll();
+    } catch (err) {
+      setTriggerError(err instanceof Error ? err.message : String(err));
+    }
   };
 
   return (
     <div className={styles.page}>
+      {triggerError && (
+        <div className={styles.errorBanner} role="alert">
+          <span><strong>Launch failed:</strong> {triggerError}</span>
+          <button className={styles.errorDismiss} onClick={() => setTriggerError(null)}>✕</button>
+        </div>
+      )}
+
       <div className={styles.header}>
         <h1 className={styles.title}>Dashboard</h1>
         <button className={styles.refreshBtn} onClick={refreshAll}>

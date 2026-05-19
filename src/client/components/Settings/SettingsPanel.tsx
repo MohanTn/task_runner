@@ -1,9 +1,18 @@
+import { useState, useEffect } from 'react';
 import { useAppState } from '../../state/AppState.js';
 import { settingsApi } from '../../api/settings.api.js';
 import styles from './SettingsPanel.module.css';
 
 export function SettingsPanel() {
   const { settings, refreshSettings } = useAppState();
+
+  const [wtPath, setWtPath] = useState(settings?.wt_exe_path ?? 'wt.exe');
+  const [psPath, setPsPath] = useState(settings?.powershell_exe_path ?? 'powershell.exe');
+
+  useEffect(() => {
+    if (settings?.wt_exe_path !== undefined) setWtPath(settings.wt_exe_path as string);
+    if (settings?.powershell_exe_path !== undefined) setPsPath(settings.powershell_exe_path as string);
+  }, [settings]);
 
   const handleCronToggle = async () => {
     if (settings?.cron_enabled) {
@@ -16,6 +25,16 @@ export function SettingsPanel() {
 
   const handleTerminalModeChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     await settingsApi.update({ terminal_mode: e.target.value as 'wt' | 'powershell' });
+    await refreshSettings();
+  };
+
+  const handleWtPathBlur = async () => {
+    await settingsApi.update({ wt_exe_path: wtPath });
+    await refreshSettings();
+  };
+
+  const handlePsPathBlur = async () => {
+    await settingsApi.update({ powershell_exe_path: psPath });
     await refreshSettings();
   };
 
@@ -46,15 +65,40 @@ export function SettingsPanel() {
             <label className={styles.label}>Launch mode</label>
             <select
               className={styles.select}
-              value={settings?.terminal_mode ?? 'powershell'}
+              value={settings?.terminal_mode ?? 'wt'}
               onChange={handleTerminalModeChange}
             >
-              <option value="powershell">PowerShell (works on all Windows systems)</option>
-              <option value="wt">Windows Terminal — wt.exe (requires Windows Terminal installed)</option>
+              <option value="wt">Windows Terminal — wt.exe (tried first)</option>
+              <option value="powershell">PowerShell (tried first)</option>
             </select>
           </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Windows Terminal path (wt.exe)</label>
+            <input
+              className={styles.input}
+              type="text"
+              value={wtPath}
+              onChange={(e) => setWtPath(e.target.value)}
+              onBlur={handleWtPathBlur}
+              placeholder="wt.exe"
+            />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>PowerShell path (powershell.exe)</label>
+            <input
+              className={styles.input}
+              type="text"
+              value={psPath}
+              onChange={(e) => setPsPath(e.target.value)}
+              onBlur={handlePsPathBlur}
+              placeholder="powershell.exe"
+            />
+          </div>
           <p className={styles.hint}>
-            PowerShell opens a new PowerShell window via WSL. Windows Terminal opens a new tab in wt.exe.
+            The selected mode is tried first; the other is the automatic fallback. If both fail, an
+            error banner appears on the Dashboard. Use full paths (e.g.{' '}
+            <code>C:\Users\you\AppData\Local\Microsoft\WindowsApps\wt.exe</code>) if the executable
+            is not on the system PATH.
           </p>
         </div>
       </div>

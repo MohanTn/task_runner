@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'child_process';
+import { spawn } from 'child_process';
 import { writeFileSync, mkdtempSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, basename } from 'path';
@@ -106,6 +106,7 @@ function launchInWindowsTerminal(
   command: string,
   prompt: string,
   jobName: string,
+  wtExePath: string,
   preCmd?: string,
   postCmd?: string,
 ): Promise<void> {
@@ -123,13 +124,13 @@ function launchInWindowsTerminal(
     );
 
     const child = spawn(
-      'wt.exe',
+      wtExePath,
       ['nt', '--title', `Job: ${jobName}`, '--', 'wsl.exe', '--', shellPath, '-i', '-l', scriptPath],
       { detached: true, stdio: 'ignore' },
     );
     child.on('spawn', () => { child.unref(); resolve(); });
     child.on('error', (err) => {
-      reject(new Error(`wt.exe not reachable: ${err.message}. Run the server directly on WSL2 (not in Docker).`));
+      reject(new Error(`wt.exe not reachable at '${wtExePath}': ${err.message}`));
     });
   });
 }
@@ -139,6 +140,7 @@ function launchInPowerShell(
   command: string,
   prompt: string,
   jobName: string,
+  psExePath: string,
   preCmd?: string,
   postCmd?: string,
 ): Promise<void> {
@@ -146,7 +148,6 @@ function launchInPowerShell(
     const tmpDir = mkdtempSync(join(tmpdir(), 'task-runner-'));
     const scriptPath = join(tmpDir, 'run.sh');
     const promptPath = join(tmpDir, 'prompt.txt');
-    const psScriptPath = join(tmpDir, 'launch.ps1');
 
     writeFileSync(promptPath, prompt, 'utf-8');
     const { shellPath, shellName } = getUserShell();
@@ -156,42 +157,43 @@ function launchInPowerShell(
       { mode: 0o755 },
     );
 
-    // wslpath converts the Linux temp path to a Windows path so PowerShell can reference it
-    const wslpathResult = spawnSync('wslpath', ['-w', psScriptPath]);
-    if (wslpathResult.error) {
-      reject(new Error(`wslpath failed: ${wslpathResult.error.message}`));
-      return;
-    }
-    const winPsPath = wslpathResult.stdout.toString().trim();
+    // -EncodedCommand accepts UTF-16LE base64 and is not subject to execution policy
+    const safeJobName = jobName.replace(/`/g, '``').replace(/'/g, "`'");
+    const psCommands = `$host.UI.RawUI.WindowTitle = 'Job: ${safeJobName}'\r\nwsl.exe -- ${shellPath} -i -l ${scriptPath}`;
+    const encoded = Buffer.from(psCommands, 'utf16le').toString('base64');
 
-    const safeJobName = jobName.replace(/'/g, "''");
-    writeFileSync(
-      psScriptPath,
-      `$host.UI.RawUI.WindowTitle = 'Job: ${safeJobName}'\nwsl.exe -- ${shellPath} -i -l ${scriptPath}\n`,
-    );
-
-    const escapedWinPath = winPsPath.replace(/'/g, "''");
     const child = spawn(
-      'powershell.exe',
-      ['-Command', `Start-Process powershell.exe -ArgumentList @('-NoExit', '-File', '${escapedWinPath}')`],
+      psExePath,
+      ['-Command', `Start-Process "${psExePath}" -ArgumentList @('-NoExit', '-EncodedCommand', '${encoded}')`],
       { detached: true, stdio: 'ignore' },
     );
     child.on('spawn', () => { child.unref(); resolve(); });
     child.on('error', (err) => {
-      reject(new Error(`powershell.exe not reachable: ${err.message}. Ensure you are running on WSL2.`));
+      reject(new Error(`powershell.exe not reachable at '${psExePath}': ${err.message}`));
     });
   });
 }
 
-export function launchTerminal(
+export async function launchTerminal(
   mode: TerminalMode,
   repoPath: string,
   command: string,
   prompt: string,
   jobName: string,
+  wtExePath: string,
+  psExePath: string,
   preCmd?: string,
   postCmd?: string,
 ): Promise<void> {
-  if (mode === 'wt') return launchInWindowsTerminal(repoPath, command, prompt, jobName, preCmd, postCmd);
-  return launchInPowerShell(repoPath, command, prompt, jobName, preCmd, postCmd);
+  const tryWt = () => launchInWindowsTerminal(repoPath, command, prompt, jobName, wtExePath, preCmd, postCmd);
+  const tryPs = () => launchInPowerShell(repoPath, command, prompt, jobName, psExePath, preCmd, postCmd);
+  const [primary, secondary] = mode === 'wt' ? [tryWt, tryPs] : [tryPs, tryWt];
+
+  try { await primary(); return; } catch (_e) { /* fall through to secondary */ }
+  try { await secondary(); return; } catch (_e) { /* fall through to error */ }
+
+  throw new Error(
+    `Neither wt.exe at '${wtExePath}' nor powershell.exe at '${psExePath}' could be launched. ` +
+    `Go to Settings → Terminal to configure the correct executable paths.`,
+  );
 }
