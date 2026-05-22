@@ -1,9 +1,14 @@
-# Task Runner
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
+  <img src="https://img.shields.io/badge/node-20%2B-brightgreen.svg" alt="Node >= 20">
+  <img src="https://img.shields.io/badge/TypeScript-5.8-3178C6.svg" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Express-5-black.svg" alt="Express 5">
+  <img src="https://img.shields.io/badge/React-19-61DAFB.svg" alt="React 19">
+  <img src="https://img.shields.io/github/actions/workflow/status/MohanTn/task_runner/ci.yml?branch=main&label=CI" alt="CI">
+</p>
 
-A self-hosted AI task runner with a web cockpit. Schedule and run Claude Code / GitHub Copilot CLI commands across multiple repositories — all from a single dashboard. Each job opens in its own **Windows Terminal tab** via `wt.exe`.
-
-![Node](https://img.shields.io/badge/node-20+-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+<h1 align="center">⬡ Task Runner</h1>
+<p align="center"><strong>Self-hosted AI task scheduler — run Claude Code / Copilot jobs across multiple repos from a web dashboard.</strong></p>
 
 ---
 
