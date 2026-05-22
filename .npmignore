@@ -1,0 +1,25 @@
+# Files to exclude from npm package
+src/
+node_modules/
+package-lock.json
+tsconfig.json
+tsconfig.client.json
+vite.config.ts
+.git/
+.gitignore
+.gitattributes
+data/
+*.db
+*.db-*
+.env
+*.log
+*.tmp
+.vscode/
+.idea/
+.github/
+.claude/
+**/__tests__/**
+**/*.test.*
+**/*.spec.*
+**/*.snap
+dist/**/*.test.*

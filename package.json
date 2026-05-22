@@ -1,15 +1,53 @@
 {
-  "name": "task-runner",
+  "name": "@mohantn/task-runner",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
+  "description": "Self-hosted AI task scheduler — schedule and run Claude Code / Copilot jobs across multiple repos from a web dashboard.",
+  "keywords": [
+    "task-runner",
+    "ai",
+    "claude-code",
+    "github-copilot",
+    "cron",
+    "scheduler",
+    "wsl2",
+    "windows-terminal"
+  ],
+  "homepage": "https://github.com/MohanTn/task_runner#readme",
+  "bugs": {
+    "url": "https://github.com/MohanTn/task_runner/issues"
+  },
+  "license": "MIT",
+  "author": "Mohan Talkad Nagaraju",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MohanTn/task_runner.git"
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "task-runner": "dist/cli-entry.js",
+    "tr": "dist/cli-entry.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "concurrently -k \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch src/index.ts",
     "dev:client": "vite --config vite.config.ts",
     "build": "tsc && vite build --config vite.config.ts",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node -e \"try{require('./scripts/postinstall.cjs')}catch(e){}\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",

@@ -5,38 +5,59 @@
   <img src="https://img.shields.io/badge/Express-5-black.svg" alt="Express 5">
   <img src="https://img.shields.io/badge/React-19-61DAFB.svg" alt="React 19">
   <img src="https://img.shields.io/github/actions/workflow/status/MohanTn/task_runner/ci.yml?branch=main&label=CI" alt="CI">
+  <img src="https://img.shields.io/npm/v/%40mohantn%2Ftask-runner?color=red" alt="npm">
 </p>
 
 <h1 align="center">⬡ Task Runner</h1>
-<p align="center"><strong>Self-hosted AI task scheduler — run Claude Code / Copilot jobs across multiple repos from a web dashboard.</strong></p>
+<p align="center"><strong>Self-hosted AI task scheduler — schedule and run Claude Code / Copilot jobs across multiple repos from a web dashboard.</strong></p>
+
+---
+
+## What it is
+
+Task Runner is a self-hosted web app that schedules and executes AI coding tasks across your repositories. Each job opens in its own **Windows Terminal tab** — you see the AI agent working live.
+
+- Schedule Claude Code or Copilot CLI commands via cron
+- Manage repos, prompts, and CLI templates from a single dashboard
+- Each job runs in an isolated terminal window — no output capture, just live execution
 
 ---
 
 ## Requirements
 
 - **Node.js 20+**
-- **Windows 11 / Windows 10** with [Windows Terminal](https://aka.ms/terminal) (`wt.exe`) and/or PowerShell (`powershell.exe`) accessible from WSL2
-- **WSL2** — the server must run inside WSL2 so it can call `wt.exe` to open terminal tabs
+- **Windows 11 / Windows 10** with [Windows Terminal](https://aka.ms/terminal) (`wt.exe`)
+- **WSL2** — the server must run inside WSL2 to call `wt.exe`
+
+---
+
+## Install
+
+```bash
+npm install -g @mohantn/task-runner
+```
+
+This installs the `task-runner` and `tr` CLI commands.
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Build and start (production)
-npm run build
-npm start
-
-# Or start with hot-reload (development)
-npm run dev
+# Start the server
+task-runner
 ```
 
-Open [http://localhost:5222](http://localhost:5222).
+Open **http://localhost:5222**. The dashboard shows your repos, jobs, and cron schedule.
 
-> **Note:** Run these commands from a WSL2 terminal, not from a Windows CMD/PowerShell session. The server needs WSL2 interop to reach `wt.exe`.
+To stop the server: `Ctrl+C`.
+
+Use a custom port:
+
+```bash
+task-runner --port 5223
+PORT=5223 task-runner
+```
 
 ---
 
@@ -44,23 +65,22 @@ Open [http://localhost:5222](http://localhost:5222).
 
 When you click **Run** on a job (or the cron scheduler fires), the server:
 
-1. Writes a small shell script to `/tmp/task-runner-XXXXX/run.sh`
-2. Tries the preferred terminal (configured in **Settings → Terminal → Launch mode**):
-   - **wt mode**: calls `wt.exe nt --title "Job: name" -- wsl.exe -- bash -l /tmp/.../run.sh`
-   - **powershell mode**: calls `powershell.exe -Command Start-Process ...`
-3. If the preferred terminal fails to spawn, the other is tried automatically (**auto-fallback**)
-4. If both fail, an error banner appears on the Dashboard with instructions to configure the executable paths in **Settings → Terminal**
+1. Writes a shell script to `/tmp/task-runner-XXXXX/run.sh`
+2. Opens a new Windows Terminal tab: `wt.exe nt -- wsl.exe -- bash -l /tmp/.../run.sh`
+3. The AI agent runs live in that terminal — you watch it work in real time
 
-No output is captured by the server — everything happens live in the terminal window.
+Auto-fallback: if `wt.exe` fails, it tries `powershell.exe`. If both fail, an error banner appears on the dashboard.
 
 ---
 
-## Screens
+## Dashboard
 
 | Tab | Description |
-|---|---|
-| **Cockpit** | Cron schedule config, repos table, jobs table with prompt editor, CLI tool settings |
-| **Settings** | Cron scheduler toggle and expression |
+|-----|-------------|
+| **Dashboard** | Health, cron status, quick trigger, recent runs |
+| **Jobs** | Create/edit jobs, attach prompts to repos |
+| **Schedules** | Cron expressions, start/stop scheduler |
+| **Settings** | Terminal paths, CLI templates, cron config |
 
 ---
 
@@ -69,59 +89,25 @@ No output is captured by the server — everything happens live in the terminal 
 ### Environment Variables
 
 | Variable | Default | Description |
-|---|---|---|
+|----------|---------|-------------|
 | `PORT` | `5222` | HTTP server port |
 
 ### Terminal Settings (Settings → Terminal)
 
 | Setting | Default | Description |
-|---|---|---|
-| **Launch mode** | `wt` | Preferred terminal: `wt` (Windows Terminal) or `powershell` |
-| **Windows Terminal path** | `wt.exe` | Absolute or PATH-relative path to `wt.exe` |
-| **PowerShell path** | `powershell.exe` | Absolute or PATH-relative path to `powershell.exe` |
-
-**Auto-fallback**: task-runner always tries the preferred mode first. If spawning fails, it automatically retries with the other terminal. If both fail, a red error banner appears on the Dashboard directing you to fix the paths here.
-
-**Custom paths** (when the executable is not on the system PATH):
-- `wt_exe_path`: `C:\Users\you\AppData\Local\Microsoft\WindowsApps\wt.exe`
-- `powershell_exe_path`: `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe`
-
-### Schedule Settings (Cockpit)
-
-- **Cron Expression** — standard 5-field cron syntax with preset picker
-- **Start/Stop** — toggle the cron scheduler on and off
-
-On each cron tick, all enabled jobs open in new Windows Terminal tabs simultaneously.
+|---------|---------|-------------|
+| Launch mode | `wt` | `wt` (Windows Terminal) or `powershell` |
+| Windows Terminal path | `wt.exe` | Path to `wt.exe` |
+| PowerShell path | `powershell.exe` | Path to `powershell.exe` |
 
 ### CLI Templates (Cockpit → CLI Settings)
 
-Default templates seeded on first run:
-
 | CLI | Template |
-|---|---|
+|-----|----------|
 | **claude** | `claude --dangerously-skip-permissions --model haiku -p` |
 | **copilot** | `copilot --yolo -m sonnet-4.5 -p` |
 
-The prompt text is appended at the end: `{template} "{prompt}"`. Edit these templates live from the Cockpit.
-
----
-
-## Repos & Jobs
-
-### Repos
-
-Each repo has:
-- A **name** and **filesystem path** (WSL2 path, e.g. `/home/user/projects/myapp`)
-- An **AI type** (`claude` or `copilot`) — determines which CLI template is used
-
-### Jobs
-
-Each job has:
-- **Name** — unique identifier
-- **Repo** — which repo to operate on
-- **Prompt** — the instruction text; the full command is auto-constructed from the repo's CLI template + prompt
-- **Timeout** — not used for terminal execution (kept for future use)
-- **Run mode** — `multiple` (re-enable after each run) or `single` (auto-disable after first trigger)
+The prompt text is appended: `{template} "{prompt}"`.
 
 ---
 
@@ -144,7 +130,7 @@ SQLite DB     Cron Scheduler
 ### Stack
 
 | Layer | Technology |
-|---|---|
+|-------|-----------|
 | Frontend | React 19, TypeScript, CSS Modules, Vite |
 | Backend | Express 5, TypeScript |
 | Database | SQLite via better-sqlite3 |
@@ -155,47 +141,25 @@ SQLite DB     Cron Scheduler
 
 ## API Reference
 
-### Jobs
-
 | Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/jobs` | List all jobs (includes `repo_name`, `ai_type`) |
+|--------|------|-------------|
+| `GET` | `/api/jobs` | List all jobs |
 | `GET` | `/api/jobs/:id` | Get a single job |
-| `POST` | `/api/jobs` | Create a job (`name` + `repo_id` + `prompt`, or `name` + `repo_path` + `command`) |
+| `POST` | `/api/jobs` | Create a job |
 | `PUT` | `/api/jobs/:id` | Update a job |
 | `DELETE` | `/api/jobs/:id` | Delete a job |
 | `POST` | `/api/jobs/:id/toggle` | Enable/disable a job |
-
-### Repos
-
-| Method | Path | Description |
-|---|---|---|
 | `GET` | `/api/repos` | List all repos |
 | `POST` | `/api/repos` | Create a repo |
 | `PUT` | `/api/repos/:id` | Update a repo |
 | `DELETE` | `/api/repos/:id` | Delete a repo |
-
-### Executions
-
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/executions/trigger` | Trigger a job (opens a new Windows Terminal tab) |
-
-### Settings & Control
-
-| Method | Path | Description |
-|---|---|---|
+| `POST` | `/api/executions/trigger` | Trigger a job |
 | `GET` | `/api/settings` | Get all settings |
 | `PUT` | `/api/settings` | Update settings |
 | `GET` | `/api/control/health` | Health check |
-| `POST` | `/api/control/cron/start` | Start the cron scheduler |
-| `POST` | `/api/control/cron/stop` | Stop the cron scheduler |
-
-### CLI Configs
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/cli-configs` | List all CLI tool templates |
+| `POST` | `/api/control/cron/start` | Start cron scheduler |
+| `POST` | `/api/control/cron/stop` | Stop cron scheduler |
+| `GET` | `/api/cli-configs` | List CLI templates |
 | `PUT` | `/api/cli-configs/:cli_name` | Update a CLI template |
 
 ---
@@ -203,6 +167,8 @@ SQLite DB     Cron Scheduler
 ## Development
 
 ```bash
+git clone https://github.com/MohanTn/task_runner.git
+cd task_runner
 npm install
 npm run dev        # API :5222 + client :5173 with hot-reload
 npm run typecheck  # Type check only
@@ -212,13 +178,12 @@ npm run build      # Full production build
 ### Adding a Migration
 
 Edit `src/db/migrations.ts`:
-
 1. Bump `SCHEMA_VERSION`
-2. Add an `if (currentVersion === N)` block with your DDL
+2. Add `if (currentVersion === N)` block with your DDL
 3. Migrations run automatically on server start
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
