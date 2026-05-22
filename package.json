@@ -1,6 +1,6 @@
 {
   "name": "@mohantn/task-runner",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Self-hosted AI task scheduler — schedule and run Claude Code / Copilot jobs across multiple repos from a web dashboard.",
   "keywords": [
@@ -30,6 +30,7 @@
   },
   "files": [
     "dist/",
+    "scripts/",
     "README.md",
     "LICENSE"
   ],
