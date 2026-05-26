@@ -15,7 +15,22 @@
 
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
 import { buildServer } from './server.js';
+
+// Resolve the installed package version at runtime
+const __filename = fileURLToPath(import.meta.url);
+const PKG_VERSION: string = (() => {
+  try {
+    const pkgPath = path.resolve(path.dirname(__filename), '..', 'package.json');
+    const raw = fs.readFileSync(pkgPath, 'utf-8');
+    const pkg = JSON.parse(raw) as { version: string };
+    return pkg.version;
+  } catch {
+    return '0.0.0';
+  }
+})();
 
 const HELP = `
 ⬡ Task Runner — Self-hosted AI task scheduler
@@ -35,7 +50,16 @@ Examples:
   PORT=5223 task-runner          # Or use environment variable
 `;
 
+const BANNER = `
+  ╔═══════════════════════════════════════════╗
+  ║    ⬡ Task Runner v${PKG_VERSION.padEnd(16)}║
+  ║   Self-hosted AI task scheduler           ║
+  ╚═══════════════════════════════════════════╝
+`;
+
 function startServer(port: number): void {
+  console.log(BANNER);
+
   const server = buildServer();
 
   server.httpServer.on('error', (err: NodeJS.ErrnoException) => {
@@ -85,7 +109,6 @@ function main(): void {
     // Build the argument list for the child process (remove --detach/-d)
     const childArgs = args.filter(a => a !== '--detach' && a !== '-d');
 
-    const __filename = fileURLToPath(import.meta.url);
     const child = spawn(process.execPath, [__filename, ...childArgs], {
       detached: true,
       stdio: 'ignore',

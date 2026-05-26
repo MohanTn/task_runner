@@ -37,6 +37,8 @@ Task Runner is a self-hosted web app that schedules and executes AI coding tasks
 npm install -g @mohantn/task-runner
 ```
 
+> **Note:** You may see a deprecation warning for `prebuild-install` during install. This comes from `better-sqlite3` (the SQLite driver used internally) and is purely cosmetic — the package installs and works correctly regardless. There is no impact on functionality.
+
 This installs the `task-runner` and `tr` CLI commands.
 
 ---
