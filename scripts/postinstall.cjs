@@ -3,13 +3,16 @@
 /**
  * task-runner postinstall script
  *
- * Runs after `npm install -g @mohantn/task-runner`.
+ * Runs after `npm install @mohantn/task-runner` (global or local).
  * Prints a welcome message and setup instructions.
+ *
+ * Uses process.stderr so the banner is visible in both global and local
+ * installs — npm may suppress stdout for lifecycle scripts.
  */
 
 const pkg = require('../package.json');
 
-console.log(`
+const banner = `
   ╔═══════════════════════════════════════════╗
   ║    ⬡ Task Runner v${String(pkg.version).padEnd(16)}║
   ║   Self-hosted AI task scheduler           ║
@@ -24,4 +27,6 @@ console.log(`
     - WSL2 with Windows Terminal (wt.exe)
 
   Docs: https://github.com/MohanTn/task_runner
-`);
+`;
+
+process.stderr.write(banner);

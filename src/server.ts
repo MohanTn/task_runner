@@ -48,9 +48,13 @@ export function buildServer(): ServerInstance {
   const packageRoot = path.resolve(__dirname, '..');
   const clientDist = path.resolve(packageRoot, 'dist/client');
   if (fs.existsSync(clientDist)) {
-    app.use(express.static(clientDist));
-    app.get('/{*splat}', (_req, res) => {
-      res.sendFile(path.join(clientDist, 'index.html'));
+    app.use(express.static(clientDist, { index: 'index.html' }));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(clientDist, 'index.html'), (err) => {
+        if (err) {
+          res.status(404).json({ error: 'Not Found' });
+        }
+      });
     });
   } else {
     console.warn('[task-runner] Client files not found at', clientDist, '— dashboard will not be served.');
