@@ -11,7 +11,10 @@ export function getDatabase(): Database.Database {
   const dataDir = path.resolve(process.cwd(), 'data');
   fs.mkdirSync(dataDir, { recursive: true });
 
-  db = new Database(path.join(dataDir, 'queue.db'));
+  const dbPath = path.join(dataDir, 'queue.db');
+  console.log('[task-runner] Database:', dbPath);
+
+  db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
 
