@@ -49,7 +49,7 @@ export function buildServer(): ServerInstance {
   const clientDist = path.resolve(packageRoot, 'dist/client');
   if (fs.existsSync(clientDist)) {
     app.use(express.static(clientDist, { index: 'index.html' }));
-    app.get('*', (_req, res) => {
+    app.get(/(.*)/, (_req, res) => {
       res.sendFile(path.join(clientDist, 'index.html'), (err) => {
         if (err) {
           res.status(404).json({ error: 'Not Found' });
