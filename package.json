@@ -48,7 +48,7 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "postinstall": "node -e \"try{require('./scripts/postinstall.cjs')}catch(e){}\""
+    "postinstall": "node scripts/postinstall.cjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
