@@ -1,6 +1,7 @@
 import express from 'express';
 import { createServer, type Server as HttpServer } from 'http';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { getDatabase } from './db/database.js';
 import { CronScheduler } from './queue/cron-scheduler.js';
@@ -42,12 +43,21 @@ export function buildServer(): ServerInstance {
   app.use('/api/repos', createReposRouter(db));
   app.use('/api/cli-configs', createCliConfigsRouter(db));
 
-  const clientDist = path.resolve(process.cwd(), 'dist/client');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const packageRoot = path.resolve(__dirname, '..');
+  const clientDist = path.resolve(packageRoot, 'dist/client');
   if (fs.existsSync(clientDist)) {
-    app.use(express.static(clientDist));
-    app.get('/{*splat}', (_req, res) => {
-      res.sendFile(path.join(clientDist, 'index.html'));
+    app.use(express.static(clientDist, { index: 'index.html' }));
+    app.get(/(.*)/, (_req, res) => {
+      res.sendFile(path.join(clientDist, 'index.html'), (err) => {
+        if (err) {
+          res.status(404).json({ error: 'Not Found' });
+        }
+      });
     });
+  } else {
+    console.warn('[task-runner] Client files not found at', clientDist, '— dashboard will not be served.');
   }
 
   const settings = db
