@@ -293,6 +293,11 @@ export function runMigrations(db: Database.Database): void {
 
   if (currentVersion < 1) {
     migrateV0(db);
+    // Run all incremental steps so fresh installs reach the same schema as upgraded ones.
+    // All step helpers are idempotent (IF NOT EXISTS / hasColumn guards / INSERT OR IGNORE).
+    for (let v = 1; v < SCHEMA_VERSION; v++) {
+      STEP_MAP[v]?.(db);
+    }
   } else {
     for (let v = currentVersion; v < SCHEMA_VERSION; v++) {
       STEP_MAP[v]?.(db);
