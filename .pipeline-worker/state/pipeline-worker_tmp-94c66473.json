@@ -1,0 +1,17 @@
+{
+  "branch": "pipeline-worker/tmp-94c66473",
+  "targetBranch": "main",
+  "worktreePath": "/tmp/pipeline-worker-Ilzbqo/worktree",
+  "attempt": 0,
+  "phase": "diff",
+  "startedAt": "2026-07-05T18:13:13.566Z",
+  "updatedAt": "2026-07-05T18:13:13.566Z",
+  "history": [
+    {
+      "at": "2026-07-05T18:13:13.566Z",
+      "phase": "diff",
+      "level": "info",
+      "message": "Created worktree at /tmp/pipeline-worker-Ilzbqo/worktree (temp branch pipeline-worker/tmp-94c66473)"
+    }
+  ]
+}

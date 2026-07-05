@@ -1,0 +1,29 @@
+{
+  "branch": "pipeline-worker/improve-readme-8c4a5a",
+  "targetBranch": "main",
+  "worktreePath": "/tmp/pipeline-worker-Ilzbqo/worktree",
+  "attempt": 0,
+  "phase": "intent",
+  "startedAt": "2026-07-05T18:13:13.566Z",
+  "updatedAt": "2026-07-05T18:13:51.113Z",
+  "history": [
+    {
+      "at": "2026-07-05T18:13:13.566Z",
+      "phase": "diff",
+      "level": "info",
+      "message": "Created worktree at /tmp/pipeline-worker-Ilzbqo/worktree (temp branch pipeline-worker/tmp-94c66473)"
+    },
+    {
+      "at": "2026-07-05T18:13:50.738Z",
+      "phase": "intent",
+      "level": "info",
+      "message": "Captured intent; renamed to feature branch pipeline-worker/improve-readme-8c4a5a"
+    },
+    {
+      "at": "2026-07-05T18:13:51.113Z",
+      "phase": "intent",
+      "level": "error",
+      "message": "build check failed, aborted before opening a merge request"
+    }
+  ]
+}
