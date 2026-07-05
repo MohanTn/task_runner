@@ -13,76 +13,85 @@
 
 ---
 
-## What it is
+## Is this for you?
 
-Task Runner is a self-hosted web app that schedules and executes AI coding tasks across your repositories. Each job opens in its own **Windows Terminal tab** — you see the AI agent working live.
+Task Runner opens a real terminal tab and runs an AI CLI (Claude Code, Copilot, etc.) inside it, live, on a schedule you set. It only works if **all three** are true:
 
-- Schedule Claude Code or Copilot CLI commands via cron
-- Manage repos, prompts, and CLI templates from a single dashboard
-- Each job runs in an isolated terminal window — no output capture, just live execution
+- ✅ You're on **Windows 11 or 10**
+- ✅ You do your development inside **WSL2**
+- ✅ You have **[Windows Terminal](https://aka.ms/terminal)** installed (`wt.exe`)
 
----
-
-## Requirements
-
-- **Node.js 20+**
-- **Windows 11 / Windows 10** with [Windows Terminal](https://aka.ms/terminal) (`wt.exe`)
-- **WSL2** — the server must run inside WSL2 to call `wt.exe`
+If any of those isn't true, this tool won't run jobs — it needs `wt.exe` to open a terminal window on the Windows side from inside WSL2.
 
 ---
 
-## Install
+## Install & run (2 minutes)
 
 ```bash
 npm install -g @mohantn/task-runner
-```
-
-> **Note:** You may see a deprecation warning for `prebuild-install` during install. This comes from `better-sqlite3` (the SQLite driver used internally) and is purely cosmetic — the package installs and works correctly regardless. There is no impact on functionality.
-
-This installs the `task-runner` and `tr` CLI commands.
-
----
-
-## Quick Start
-
-```bash
-# Start the server
 task-runner
 ```
 
-Open **http://localhost:5222**. The dashboard shows your repos, jobs, and cron schedule.
+Open **http://localhost:5222** — that's it, the dashboard is running.
 
-To stop the server: `Ctrl+C`.
+> You may see a `prebuild-install` deprecation warning during install. That's from `better-sqlite3` (the database driver) and is harmless — the install still completes correctly.
 
-Use a custom port:
+This gives you two equivalent commands: `task-runner` and the shorter `tr`.
+
+To stop the server, press `Ctrl+C`. To run on a different port:
 
 ```bash
 task-runner --port 5223
+# or
 PORT=5223 task-runner
+```
+
+Run detached (keeps going after you close the terminal):
+
+```bash
+task-runner --detach
 ```
 
 ---
 
-## How It Works
+## First steps in the dashboard
 
-When you click **Run** on a job (or the cron scheduler fires), the server:
-
-1. Writes a shell script to `/tmp/task-runner-XXXXX/run.sh`
-2. Opens a new Windows Terminal tab: `wt.exe nt -- wsl.exe -- bash -l /tmp/.../run.sh`
-3. The AI agent runs live in that terminal — you watch it work in real time
-
-Auto-fallback: if `wt.exe` fails, it tries `powershell.exe`. If both fail, an error banner appears on the dashboard.
+1. **Repos** — add the local repo path(s) you want the AI to work in, and pick `claude` or `copilot` as the CLI.
+2. **Jobs** — create a job: pick a repo and write the prompt the AI should run.
+3. Click **Run** — a new Windows Terminal tab opens and you watch the AI work in real time.
+4. Optional: attach the job to a **Schedule** (cron expression) so it runs automatically.
 
 ---
 
-## Dashboard
+## How it works
 
-| Tab | Description |
-|-----|-------------|
-| **Dashboard** | Health, cron status, quick trigger, recent runs |
-| **Jobs** | Create/edit jobs, attach prompts to repos |
-| **Schedules** | Cron expressions, start/stop scheduler |
-| **Settings** | Terminal paths, CLI templates, cron config |
+When you click **Run** (or a schedule fires), the server:
+
+1. Writes a small shell script to a temp folder (`/tmp/task-runner-XXXXX/run.sh`)
+2. Opens a new Windows Terminal tab: `wt.exe nt -- wsl.exe -- bash -l /tmp/.../run.sh`
+3. The AI CLI runs live in that terminal, using your configured command template + prompt
+
+If `wt.exe` isn't reachable, it automatically falls back to `powershell.exe`. If neither works, the dashboard shows an error telling you to fix the paths in **Settings → Terminal**.
+
+```
+Browser (React SPA)
+       │ HTTP REST
+Express Server (:5222)
+       │
+  ┌────┴────────────┐
+  │                 │
+SQLite DB     Cron Scheduler
+(jobs/repos/  (node-cron)
+ settings)         │
+                   │ wt.exe nt -- bash -l /tmp/run.sh
+             Windows Terminal tab (WSL2)
+```
+
+---
+
+## Where your data lives
+
+Jobs, repos, and settings are stored in a local SQLite file at **`./data/queue.db`, relative to the folder you run `task-runner` from.** Run it from the same folder every time (or use `task-runner --detach` from a fixed location) so you always see the same jobs.
 
 ---
 
@@ -99,45 +108,17 @@ Auto-fallback: if `wt.exe` fails, it tries `powershell.exe`. If both fail, an er
 | Setting | Default | Description |
 |---------|---------|-------------|
 | Launch mode | `wt` | `wt` (Windows Terminal) or `powershell` |
-| Windows Terminal path | `wt.exe` | Path to `wt.exe` |
-| PowerShell path | `powershell.exe` | Path to `powershell.exe` |
+| Windows Terminal path | `wt.exe` | Path to `wt.exe`, if not on PATH |
+| PowerShell path | `powershell.exe` | Path to `powershell.exe`, if not on PATH |
 
-### CLI Templates (Cockpit → CLI Settings)
+### CLI Templates (Settings → CLI Templates)
 
-| CLI | Template |
+| CLI | Default command template |
 |-----|----------|
 | **claude** | `claude --dangerously-skip-permissions --model haiku -p` |
 | **copilot** | `copilot --yolo -m sonnet-4.5 -p` |
 
-The prompt text is appended: `{template} "{prompt}"`.
-
----
-
-## Architecture
-
-```
-Browser (React SPA)
-       │ HTTP REST
-Express Server (:5222)
-       │
-  ┌────┴────────────┐
-  │                 │
-SQLite DB     Cron Scheduler
-(jobs/repos/  (node-cron)
- settings)         │
-                   │ wt.exe nt -- bash -l /tmp/run.sh
-             Windows Terminal tab (WSL2)
-```
-
-### Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, CSS Modules, Vite |
-| Backend | Express 5, TypeScript |
-| Database | SQLite via better-sqlite3 |
-| Scheduling | node-cron |
-| Terminal | wt.exe (Windows Terminal) via WSL2 interop |
+Your job's prompt is appended to the template: `{template} "{prompt}"`. Edit templates in Settings to change models, flags, or point at a different CLI entirely.
 
 ---
 
@@ -166,23 +147,23 @@ SQLite DB     Cron Scheduler
 
 ---
 
-## Development
+## Developing locally
 
 ```bash
 git clone https://github.com/MohanTn/task_runner.git
 cd task_runner
 npm install
-npm run dev        # API :5222 + client :5173 with hot-reload
+npm run dev        # API :5222 + client :5173, both hot-reload
 npm run typecheck  # Type check only
 npm run build      # Full production build
 ```
 
-### Adding a Migration
+### Adding a database migration
 
 Edit `src/db/migrations.ts`:
 1. Bump `SCHEMA_VERSION`
-2. Add `if (currentVersion === N)` block with your DDL
-3. Migrations run automatically on server start
+2. Add an `if (currentVersion === N)` block with your DDL
+3. Migrations run automatically the next time the server starts
 
 ---
 
